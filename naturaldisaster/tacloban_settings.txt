@@ -10,8 +10,8 @@
 Scenario.name = Tacloban
 Scenario.simulateConnections = true
 Scenario.updateInterval = 0.1
-# The value of Scenario.endTime has to be larger than the number of days * daylength (input is required below) -> 518400 in our case (so we round the value to 550000)
-Scenario.endTime = 550000
+# The value of Scenario.endTime calculated as Group.nbrOfDays * Group.dayLength + Group.msgTtl (inputs below)
+Scenario.endTime = 626400
 # Defining 7 different node groups to be simulated
 Scenario.nrofHostGroups = 7
 
@@ -28,11 +28,6 @@ btInterface.type = SimpleBroadcastInterface
 # Transmit speed of 2 Mbps = 250kBps
 btInterface.transmitSpeed = 250k
 btInterface.transmitRange = 10
-
-# High speed, long range, interface
-highspeedInterface.type = SimpleBroadcastInterface
-highspeedInterface.transmitSpeed = 6M
-highspeedInterface.transmitRange = 50
 
 
 ## Group-specific settings:
@@ -59,14 +54,13 @@ highspeedInterface.transmitRange = 50
 Group.movementModel = NaturalDisasterMovementModel
 # Chosing the routing algorithm
 Group.router = EpidemicRouter
-Group.bufferSize = 5M
+Group.bufferSize = 20M
 Group.waitTime = 0, 120
-# All nodes have a bluetooth and a WiFi interface 
-Group.nrofInterfaces = 2
+# All nodes have a bluetooth interface
+Group.nrofInterfaces = 1
 Group.interface1 = btInterface
-Group.interface2 = highspeedInterface
-# Message TTL of 300 minutes (5 hours)
-Group.msgTtl = 300
+# Message TTL of (6 hours)
+Group.msgTtl = 360
 # Minimum sleeping time per day (6h)
 Group.sleepingTimeMin = 21600
 # Maximum sleeping time per day (8h)
@@ -74,7 +68,7 @@ Group.sleepingTimeMax = 28800
 # Length of a single day in simulation, in seconds (24h = 86400s)
 Group.dayLength = 86400
 # Number of days the simulation should run
-Group.nbrOfDays = 6
+Group.nbrOfDays = 7
 # Add an offset delay such that groups can start at different times
 Group.offsetStartDelay = 12000
 # WKT files required for movement of the different groups and their location on disk (inside the ONE folder)
@@ -103,49 +97,49 @@ Group1.groupID = 100
 # Walking speeds
 Group1.speed = 0.5, 1.5
 # Number of hosts in group 
-Group1.nrofHosts = 10
+Group1.nrofHosts = 20
 
-# Group 2 - INJURED_GROUP_ID - Specific Settings 
+# Group 2 - INJURED_GROUP_ID - Specific Settings
 Group2.groupID = 101
 # Walking speeds (values are lower since we are injured)
 Group2.speed = 0.3, 0.9
-# Number of hosts in group 
-Group2.nrofHosts = 20
+# Number of hosts in group
+Group2.nrofHosts = 40
 
-# Group 3 - NONINJURED_GROUP_ID - Specific Settings 
+# Group 3 - NONINJURED_GROUP_ID - Specific Settings
 Group3.groupID = 102
 # Walking speeds
 Group3.speed = 0.5, 1.5
-# Number of hosts in group 
-Group3.nrofHosts = 100
+# Number of hosts in group
+Group3.nrofHosts = 200
 
-# Group 4 - SEARCH_RESCUE_GROUP_ID - Specific Settings 
+# Group 4 - SEARCH_RESCUE_GROUP_ID - Specific Settings
 Group4.groupID = 103
-# Walking speeds (max. value is lower than others since we carry heavy eqipment)
+# Walking speeds (max. value is lower than others since we carry heavy equipment)
 Group4.speed = 0.5, 1.2
-# Number of hosts in group 
-Group4.nrofHosts = 25
+# Number of hosts in group
+Group4.nrofHosts = 50
 
-# Group 5 - GOVERNMENT_GROUP_ID - Specific Settings 
+# Group 5 - GOVERNMENT_GROUP_ID - Specific Settings
 Group5.groupID = 104
 # Walking speeds
 Group5.speed = 0.5, 1.5
-# Number of hosts in group 
-Group5.nrofHosts = 25
+# Number of hosts in group
+Group5.nrofHosts = 50
 
-# Group 6 - UN_GROUP_ID - Specific Settings 
+# Group 6 - UN_GROUP_ID - Specific Settings
 Group6.groupID = 105
 # Walking speeds
 Group6.speed = 0.5, 1.5
-# Number of hosts in group 
-Group6.nrofHosts = 20
+# Number of hosts in group
+Group6.nrofHosts = 40
 
-# Group 7 - DRO_GROUP_ID - Specific Settings 
+# Group 7 - DRO_GROUP_ID - Specific Settings
 Group7.groupID = 106
 # Walking speeds
 Group7.speed = 0.5, 1.5
-# Number of hosts in group 
-Group7.nrofHosts = 50
+# Number of hosts in group
+Group7.nrofHosts = 100
 
 
 ## Message creation parameters
@@ -154,14 +148,16 @@ Events.nrof = 1
 # Class of the first event generator
 Events1.class = MessageEventGenerator
 # (following settings are specific for the MessageEventGenerator class)
-# Creation interval in seconds (one new message every 30 to 120 seconds)
-Events1.interval = 120,600
-# Message sizes (250kB - 1MB)
-Events1.size = 250k,1M
+# Creation interval in seconds (one new message approx. every 10 seconds)
+Events1.interval = 8,12
+# Message sizes (50kB - 1MB)
+Events1.size = 50k,100k
 # range of message source/destination addresses
-Events1.hosts = 0,250
+Events1.hosts = 0,500
 # Message ID prefix
 Events1.prefix = M
+# Time make sure that message passing stops after 7 days
+Events1.time = 0,604800
 
 
 ## Movement model settings
@@ -182,7 +178,7 @@ MapBasedMovement.mapFile1 = data/Tacloban/tacloban_big_wkt.wkt
 ## Reports - all report names have to be valid report classes
 
 # how many reports to load
-Report.nrofReports = 16
+Report.nrofReports = 17
 # length of the warm up period (simulated seconds)
 Report.warmup = 0
 # default directory of reports (can be overridden per Report with output setting)
@@ -199,14 +195,21 @@ Report.report8 = InterContactTimesReport
 Report.report9 = MessageDelayReport
 Report.report10 = MessageDeliveryReport
 Report.report11 = MessageReport
-Report.report12 = MessageStatsReport
+Report.report12 = EfficientMessageStatsReport
 Report.report13 = NodeDensityReport
 Report.report14 = TotalContactTimeReport
 Report.report15 = TotalEncountersReport
 Report.report16 = UniqueEncountersReport
+Report.report17 = BufferOccupancyReport
 # Report granularity 
 Report.granularity = 1
 MessageCopyCountReport.granularity = 1
+# Resolution of 10x10 m^2 blocks
+NodeDensityReport.xCount = 500
+NodeDensityReport.yCount = 700
+# To keep report size small
+NodeDensityReport.onlyAverage = true
+NodeDensityReport.sampleInterval = 3600
 
 ## Default settings for some routers settings
 ProphetRouter.secondsInTimeUnit = 30
@@ -215,7 +218,7 @@ SprayAndWaitRouter.binaryMode = true
 
 ## Optimization settings -- these affect the speed of the simulation
 ## see World class for details.
-Optimization.cellSizeMult = 5
+Optimization.cellSizeMult = 1
 Optimization.randomizeUpdateOrder = true
 
 

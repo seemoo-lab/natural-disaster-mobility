@@ -29,11 +29,6 @@ btInterface.type = SimpleBroadcastInterface
 btInterface.transmitSpeed = 250k
 btInterface.transmitRange = 10
 
-# High speed, long range, interface
-highspeedInterface.type = SimpleBroadcastInterface
-highspeedInterface.transmitSpeed = 6M
-highspeedInterface.transmitRange = 50
-
 
 ## Group-specific settings:
 # groupID : Group's identifier. Used as the prefix of host names
@@ -59,14 +54,13 @@ highspeedInterface.transmitRange = 50
 Group.movementModel = NaturalDisasterMovementModel
 # Chosing the routing algorithm
 Group.router = EpidemicRouter
-Group.bufferSize = 5M
+Group.bufferSize = 100M
 Group.waitTime = 0, 120
-# All nodes have a bluetooth and a WiFi interface 
-Group.nrofInterfaces = 2
+# All nodes have a bluetooth interface
+Group.nrofInterfaces = 1
 Group.interface1 = btInterface
-Group.interface2 = highspeedInterface
-# Message TTL of 300 minutes (5 hours)
-Group.msgTtl = 300
+# Message TTL of (6 hours)
+Group.msgTtl = 360
 # Minimum sleeping time per day (6h)
 Group.sleepingTimeMin = 21600
 # Maximum sleeping time per day (8h)
@@ -155,14 +149,16 @@ Events.nrof = 1
 # Class of the first event generator
 Events1.class = MessageEventGenerator
 # (following settings are specific for the MessageEventGenerator class)
-# Creation interval in seconds (one new message every 30 to 120 seconds)
-Events1.interval = 120,600
-# Message sizes (250kB - 1MB)
-Events1.size = 250k,1M
+# Creation interval in seconds (one new message approx. every 10 seconds)
+Events1.interval = 8,12
+# Message sizes (50kB - 1MB)
+Events1.size = 50k,1M
 # range of message source/destination addresses
 Events1.hosts = 0,750
 # Message ID prefix
 Events1.prefix = M
+# Time make sure that message passing stops after 6 days
+Events1.time = 0,518400
 
 
 ## Movement model settings
@@ -183,7 +179,7 @@ MapBasedMovement.mapFile1 = data/PortauPrince/port_au_prince_main.wkt
 ## Reports - all report names have to be valid report classes
 
 # how many reports to load
-Report.nrofReports = 16
+Report.nrofReports = 17
 # length of the warm up period (simulated seconds)
 Report.warmup = 0
 # default directory of reports (can be overridden per Report with output setting)
@@ -200,14 +196,21 @@ Report.report8 = InterContactTimesReport
 Report.report9 = MessageDelayReport
 Report.report10 = MessageDeliveryReport
 Report.report11 = MessageReport
-Report.report12 = MessageStatsReport
+Report.report12 = EfficientMessageStatsReport
 Report.report13 = NodeDensityReport
 Report.report14 = TotalContactTimeReport
 Report.report15 = TotalEncountersReport
 Report.report16 = UniqueEncountersReport
+Report.report17 = BufferOccupancyReport
 # Report granularity 
 Report.granularity = 1
 MessageCopyCountReport.granularity = 1
+# Resolution of 10x10 m^2 blocks
+NodeDensityReport.xCount = 2600
+NodeDensityReport.yCount = 1650
+# To keep report size small
+NodeDensityReport.onlyAverage = true
+NodeDensityReport.sampleInterval = 3600
 
 ## Default settings for some routers settings
 ProphetRouter.secondsInTimeUnit = 30
@@ -216,7 +219,7 @@ SprayAndWaitRouter.binaryMode = true
 
 ## Optimization settings -- these affect the speed of the simulation
 ## see World class for details.
-Optimization.cellSizeMult = 5
+Optimization.cellSizeMult = 1
 Optimization.randomizeUpdateOrder = true
 
 
