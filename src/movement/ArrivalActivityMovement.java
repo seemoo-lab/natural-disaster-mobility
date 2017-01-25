@@ -31,8 +31,6 @@ import core.SimClock;
 public class ArrivalActivityMovement extends MapBasedMovement implements SwitchableMovement {
 
 	// Constants for importing settings from default settings file
-	// Seed used for initializing the scenario's random number generator -> The same seed will always produce the same output which is mandatory for creating reproducable results!
-	public static final String RNGSEED = "rngSeed";
 	public static final String OFFSET_START_DELAY = "offsetStartDelay";
 	
 	// Location files loaded via external default settings file (if provided)
@@ -41,9 +39,7 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 	public static final String OSOCC_LOCATIONS_FILE_SETTING = "osoccLocationsFile";
 	public static final String BASE_CAMP_LOCATIONS_FILE_SETTING = "baseCampLocationsFile";
 	
-	// Seed used for initializing the activity's random number generator such that the same seed will always produce the same output! 
-	private long rngSeed; 
-	// Offset that is added to delay the start of this particular activity 
+	// Offset that is added to delay the start of this particular activity
 	private double offsetStartDelay;
 	
 	// File names of the specific location files
@@ -100,9 +96,6 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 	 // To be set true if we're done with this activity  ---> Status can be requested via .isReady() function
 	private boolean ready = false; 
 	
-	// Random generator initalized with seed (if provided via settings file)
-	private Random rand;
-	
 	// Current time we still need to wait
 	private double waitingTime = 0; 
 	
@@ -115,13 +108,6 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 		pathFinder = new DijkstraPathFinder(null);
 		
 		// Loading settings via default settings file
-		if (settings.contains(RNGSEED)) {
-			this.rngSeed = settings.getLong(RNGSEED);
-		}
-		else {
-			System.out.println("You didn't specify a value as a seed for the random number generator!");
-			System.out.println("rngSeed: " + this.rngSeed); 
-		}
 		if (settings.contains(OFFSET_START_DELAY)) {
 			this.offsetStartDelay = settings.getDouble(OFFSET_START_DELAY);
 		}
@@ -163,9 +149,6 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 		} catch (Throwable t) {
 			System.out.println("Reading the location files somehow failed - did you specify the correct path?"); 
 		}
-		
-		// Create a new random generator for this activity with the provided seed -> Important for ensuring reproducable results! 
-		this.rand = new Random(this.rngSeed);  
 		
 		// Reading specific locations from the map files provided via default settings file
 		SimMap map = getMap();
@@ -262,15 +245,14 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 
 	/**
 	 * Construct a new ArrivalActivityMovement instance from a prototype
-	 * @param proto
+	 * @param prototype
 	 */
 	public ArrivalActivityMovement(ArrivalActivityMovement prototype) {
 		super(prototype);
 		this.pathFinder = prototype.pathFinder;
 		
 		// Loading settings via default settings file
-		this.rand = prototype.getRand(); 
-		this.airport = prototype.getAirport(); 
+		this.airport = prototype.getAirport();
 		this.rdc = prototype.getRdc(); 
 		this.osocc = prototype.getOsocc(); 
 		this.baseCamp = prototype.getBaseCamp(); 
@@ -569,19 +551,14 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 	// Get random int value, between provided min and max; returns 0 if invalid argument is provided 
 	public int getRandom(int min, int max) {
 		if ((min >= 0) && (max > 0)) {
-			return this.rand.nextInt((max - min) + min);
+			return rng.nextInt(max - min) + min;
 		}
 		return 0; 
 	}
 
 	// Get random double value, between 0.0 and 1.0
-	public double getRandomDouble() {
-		return this.rand.nextDouble(); 
-	}
-	
-	// Return our random generator 
-	public Random getRand() {
-		return this.rand; 
+	private double getRandomDouble() {
+		return rng.nextDouble();
 	}
 	
 	// Returns false if we haven't finished yet

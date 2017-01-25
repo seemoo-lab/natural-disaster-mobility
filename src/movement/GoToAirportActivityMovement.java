@@ -31,9 +31,6 @@ import core.SimClock;
 public class GoToAirportActivityMovement extends MapBasedMovement implements SwitchableMovement {
 	
 	// Constants for importing settings from default settings file
-	// Seed used for initializing the scenario's random number generator -> The same seed will always produce the same output which is mandatory for creating reproducable results!
-	public static final String RNGSEED = "rngSeed";
-	
 	// Location files loaded via external default settings file (if provided)
 	public static final String AIRPORT_LOCATIONS_FILE_SETTING = "airportLocationsFile";
 	
@@ -76,9 +73,6 @@ public class GoToAirportActivityMovement extends MapBasedMovement implements Swi
 	 // To be set true if we're done with this activity  ---> Status can be requested via .isReady() function
 	private boolean ready = false; 
 	
-	// Random generator initalized with seed (if provided via settings file)
-	private Random rand;
-	
 	// Current time we still need to wait
 	private double waitingTime = 0; 
 	
@@ -92,14 +86,7 @@ public class GoToAirportActivityMovement extends MapBasedMovement implements Swi
 		pathFinder = new DijkstraPathFinder(null);
 		
 		// Loading settings via default settings file
-		if (settings.contains(RNGSEED)) {
-			this.rngSeed = settings.getLong(RNGSEED);
-		}
-		else {
-			System.out.println("You didn't specify a value as a seed for the random number generator!");
-			System.out.println("rngSeed: " + this.rngSeed); 
-		}
-		
+
 		// Loading location files as specified via default settings file (has to be done via try-catch)
 		try {	
 			if (settings.contains(AIRPORT_LOCATIONS_FILE_SETTING)) {
@@ -112,10 +99,7 @@ public class GoToAirportActivityMovement extends MapBasedMovement implements Swi
 		} catch (Throwable t) {
 			System.out.println("Reading the location files somehow failed - did you specify the correct path?"); 
 		}
-		
-		// Create a new random generator for this activity with the provided seed -> Important for ensuring reproducable results! 
-		this.rand = new Random(this.rngSeed);  
-		
+
 		// Reading specific locations from the map files provided via default settings file
 		SimMap map = getMap();
 		Coord offset = map.getOffset();
@@ -151,15 +135,14 @@ public class GoToAirportActivityMovement extends MapBasedMovement implements Swi
 
 	/**
 	 * Construct a new GoToAirportActivityMovement instance from a prototype
-	 * @param proto
+	 * @param prototype
 	 */
 	public GoToAirportActivityMovement(GoToAirportActivityMovement prototype) {
 		super(prototype);
 		this.pathFinder = prototype.pathFinder;
 		
 		// Loading settings via default settings file
-		this.rand = prototype.getRand(); 
-		this.airport = prototype.getAirport(); 
+		this.airport = prototype.getAirport();
 		
 		// Chose a random position for the airport location
 		int firstRandom = this.getRandom(0,this.airport.size()-1);
@@ -311,19 +294,14 @@ public class GoToAirportActivityMovement extends MapBasedMovement implements Swi
 	// Get random int value, between provided min and max; returns 0 if invalid argument is provided 
 	public int getRandom(int min, int max) {
 		if ((min >= 0) && (max > 0)) {
-			return this.rand.nextInt((max - min) + min);
+			return rng.nextInt(max - min) + min;
 		}
 		return 0; 
 	}
 
 	// Get random double value, between 0.0 and 1.0
 	public double getRandomDouble() {
-		return this.rand.nextDouble(); 
-	}
-	
-	// Return our random generator 
-	public Random getRand() {
-		return this.rand; 
+		return rng.nextDouble();
 	}
 	
 	// Function for (re-) activating our go to airport mode

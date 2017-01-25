@@ -29,8 +29,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 	public static final String GROUP_ID = "groupID";
 	public static final String DAY_LENGTH = "dayLength";
 	public static final String NUMBER_OF_DAYS = "nbrOfDays";
-	public static final String RNGSEED = "rngSeed";
-	
+
 	// Sub-movement models we load for scenario creation
 	private SleepActivityMovement goSleepMM;
 	private ArrivalActivityMovement airportArrivalMM;
@@ -82,11 +81,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 	private int mode;
 	// The group ID of the specific movement model 
 	private int groupID;
-	
-	// Seed used for initializing the scenario's random number generator such that same the same seed will always produce the same output! (mandatory for reproducability of results!)
-	private long rngSeed; 
-	private Random rand;
-	
+
 	// Length of the day in seconds
 	private double dayLength; 
 	// Number of days
@@ -134,15 +129,6 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 			System.out.println("You didn't specify a value for the number of days!");
 			System.out.println("nbrOfDays: " + this.nbrOfDays); 
 		}
-		if (settings.contains(RNGSEED)) {
-			rngSeed = settings.getLong(RNGSEED);
-		}
-		else {
-			System.out.println("You didn't specify a value as a seed for the random number generator!");
-			System.out.println("rngSeed: " + this.rngSeed); 
-		}
-		
-		this.rand = new Random(this.rngSeed);
 		
 		// Current movement model (e.g. activity) for the specific groups are set in accordance with their groupID
 		switch (groupID) {
@@ -196,7 +182,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 
 	/**
 	 * Creates a new instance of NaturalDisasterMovementModel from a prototype
-	 * @param proto
+	 * @param prototype
 	 */
 	public NaturalDisasterMovementModel(NaturalDisasterMovementModel prototype) {
 		// Import settings with all parameters from prototype
@@ -214,8 +200,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 		this.dayCounter = 0;
 		
 		this.groupID = prototype.getGroupID();
-		this.rand = prototype.getRand(); 
-		this.dayLength = prototype.getDayLength(); 
+		this.dayLength = prototype.getDayLength();
 		this.nbrOfDays = prototype.getNbrOfDays();
 		
 		// Current movement model (e.g. activity) for the specific groups are set in accordance with their groupID
@@ -699,25 +684,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 	public int getGroupID() {
 		return this.groupID;
 	}
-	
-	// Get random int value, between provided min and max; returns 0 if invalid argument is provided 
-	public int getRandom(int min, int max) {
-		if ((min >= 0) && (max > 0)) {
-			return this.rand.nextInt((max - min) + min);
-		}
-		return 0; 
-	}
-	
-	// Get random double value, between 0.0 and 1.0
-	public double getRandomDouble() {
-		return this.rand.nextDouble(); 
-	}
 
-	// Return our random generator 
-	public Random getRand() {
-		return this.rand; 
-	}
-	
 	public double getDayLength() {
 		return this.dayLength; 
 	}

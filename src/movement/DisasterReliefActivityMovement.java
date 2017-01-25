@@ -35,8 +35,6 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 	// Constants for importing settings from default settings file
 	public static final String DAY_LENGTH = "dayLength";
 	public static final String NUMBER_OF_DAYS = "nbrOfDays";
-	// Seed used for initializing the scenario's random number generator -> The same seed will always produce the same output which is mandatory for creating reproducable results!
-	public static final String RNGSEED = "rngSeed";
 	// Number of places to be visited
 	public static final String PLACES_TO_VISIT = "placesToVisit"; 
 	
@@ -52,8 +50,6 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 	private double dayLength; 
 	// Number of days
 	private int nbrOfDays; 
-	// Seed used for initializing the activity's random number generator such that the same seed will always produce the same output! 
-	private long rngSeed; 
 	// Number of places we visit
 	private double placesToVisit; 
 	// Places actually visited so far
@@ -123,10 +119,7 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 	 // To be set true if we're done with this activity  ---> Status can be requested via .isReady() function
 	private boolean ready = false; 
 	
-	// Random generator initalized with seed (if provided via settings file)
-	private Random rand;
-	
-	// Local day counter 
+	// Local day counter
 	private int dayCounter; 
 	
 	// Current time we still need to wait
@@ -141,13 +134,6 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 		pathFinder = new DijkstraPathFinder(null);
 		
 		// Loading settings via default settings file
-		if (settings.contains(RNGSEED)) {
-			this.rngSeed = settings.getLong(RNGSEED);
-		}
-		else {
-			System.out.println("You didn't specify a value as a seed for the random number generator!");
-			System.out.println("rngSeed: " + this.rngSeed); 
-		}
 		if (settings.contains(DAY_LENGTH)) {
 			this.dayLength = settings.getDouble(DAY_LENGTH);
 		}
@@ -218,10 +204,7 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 			System.out.println("Reading the location files somehow failed - did you specify the correct path?"); 
 		}
 		
-		// Create a new random generator for this activity with the provided seed -> Important for ensuring reproducable results! 
-		this.rand = new Random(this.rngSeed);  
-		
-		// Set day counter to 0 since we start our simulation at day 0 
+		// Set day counter to 0 since we start our simulation at day 0
 		this.dayCounter = 0;
 		
 		// Reading specific locations from the map files provided via default settings file
@@ -359,15 +342,14 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 
 	/**
 	 * Construct a new DisasterReliefActivityMovement instance from a prototype
-	 * @param proto
+	 * @param prototype
 	 */
 	public DisasterReliefActivityMovement(DisasterReliefActivityMovement prototype) {
 		super(prototype);
 		this.pathFinder = prototype.pathFinder;
 		
 		// Loading settings via default settings file
-		this.rand = prototype.getRand(); 
-		this.dayLength = prototype.getDayLength(); 
+		this.dayLength = prototype.getDayLength();
 		this.nbrOfDays = prototype.getNbrOfDays(); 
 		this.placesToVisit = prototype.getPlacesToVisit(); 
 		this.mainPoints = prototype.getMainPoints(); 
@@ -898,33 +880,24 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 	{
 		return this.airport; 
 	}
-	
-	public long getSeed() {
-		return this.rngSeed; 
-	}
-	
+
 	public double getPlacesToVisit() {
 		return this.placesToVisit; 
 	}
 	
 	// Get random int value, between provided min and max; returns 0 if invalid argument is provided 
-	public int getRandom(int min, int max) {
+	private int getRandom(int min, int max) {
 		if ((min >= 0) && (max > 0)) {
-			return this.rand.nextInt((max - min) + min);
+			return rng.nextInt(max - min) + min;
 		}
 		return 0; 
 	}
 
 	// Get random double value, between 0.0 and 1.0
-	public double getRandomDouble() {
-		return this.rand.nextDouble(); 
+	private double getRandomDouble() {
+		return rng.nextDouble();
 	}
-	
-	// Return our random generator 
-	public Random getRand() {
-		return this.rand; 
-	}
-	
+
 	public double getDayLength() {
 		return this.dayLength; 
 	}

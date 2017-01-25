@@ -36,9 +36,7 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 	public static final String DAY_LENGTH = "dayLength";
 	public static final String NUMBER_OF_DAYS = "nbrOfDays";
 	public static final String OFFSET_START_DELAY = "offsetStartDelay";
-	// Seed used for initializing the scenario's random number generator -> The same seed will always produce the same output which is mandatory for creating reproducable results!
-	public static final String RNGSEED = "rngSeed";
-	
+
 	 // Only true if we're done with sleeping
 	private boolean doneSleeping;
 	
@@ -52,9 +50,7 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 	private int nbrOfDays; 
 	// Offset that is added to delay the start of this particular activity 
 	private double offsetStartDelay;
-	// Seed used for initializing the activity's random number generator such that the same seed will always produce the same output! 
-	private long rngSeed; 
-	
+
 	// The exact timeslot when we (re-)started this activtiy 
 	private double startedActivityTime;
 	
@@ -69,10 +65,7 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 	 // To be set true if we're done with this activity  ---> Status can be requested via .isReady() function
 	private boolean ready = false; 
 	
-	// Random generator initalized with seed (if provided via settings file)
-	private Random rand;
-	
-	// Local day counter 
+	// Local day counter
 	private int dayCounter; 
 	
 	/**
@@ -118,16 +111,7 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 			System.out.println("You didn't specify a value for the offset start delay!");
 			System.out.println("offsetStartDelay: " + this.offsetStartDelay); 
 		}
-		if (settings.contains(RNGSEED)) {
-			this.rngSeed = settings.getLong(RNGSEED);
-		}
-		else {
-			System.out.println("You didn't specify a value as a seed for the random number generator!");
-			System.out.println("rngSeed: " + this.rngSeed); 
-		}
-		
-		// Create a new random generator for this activity with the provided seed -> Important for ensuring reproducable results! 
-		this.rand = new Random(this.rngSeed);  
+
 		// Generating our own sleep time
 		this.sleepTime = (this.sleepingTimeMax * this.getRandomDouble()) + (this.sleepingTimeMin * this.getRandomDouble()); 
 		// Checking boundaries of sleep time
@@ -150,13 +134,12 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 
 	/**
 	 * Construct a new SleepActivityMovement instance from a prototype
-	 * @param proto
+	 * @param prototype
 	 */
 	public SleepActivityMovement(SleepActivityMovement prototype) {
 		super(prototype);
 		// Loading settings via default settings file
-		this.rand = prototype.getRand(); 
-		this.sleepingTimeMin = prototype.getSleepingTimeMin(); 
+		this.sleepingTimeMin = prototype.getSleepingTimeMin();
 		this.sleepingTimeMax = prototype.getSleepingTimeMax(); 
 		this.dayLength = prototype.getDayLength(); 
 		this.nbrOfDays = prototype.getNbrOfDays(); 
@@ -259,22 +242,9 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 		return 100;
 	}
 	
-	// Get random int value, between provided min and max; returns 0 if invalid argument is provided 
-	public int getRandom(int min, int max) {
-		if ((min >= 0) && (max > 0)) {
-			return this.rand.nextInt((max - min) + min);
-		}
-		return 0; 
-	}
-	
 	// Get random double value, between 0.0 and 1.0
-	public double getRandomDouble() {
-		return this.rand.nextDouble(); 
-	}
-	
-	// Return our random generator 
-	public Random getRand() {
-		return this.rand; 
+	private double getRandomDouble() {
+		return rng.nextDouble();
 	}
 	
 	public double getSleepingTimeMin() {

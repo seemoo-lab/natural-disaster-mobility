@@ -38,8 +38,6 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 	public static final String DAY_LENGTH = "dayLength";
 	public static final String NUMBER_OF_DAYS = "nbrOfDays";
 	public static final String SLEEPING_TIME_MIN = "sleepingTimeMin";
-	// Seed used for initializing the scenario's random number generator -> The same seed will always produce the same output which is mandatory for creating reproducable results!
-	public static final String RNGSEED = "rngSeed";
 	// Number of neighbors in near surroundings to be visited
 	public static final String NEIGHBORS_TO_VISIT = "neighborsToVisit"; 
 	// Number of places to be visited
@@ -59,8 +57,6 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 	private double dayLength; 
 	// Number of days
 	private int nbrOfDays; 
-	// Seed used for initializing the activity's random number generator such that the same seed will always produce the same output! 
-	private long rngSeed; 
 	 // Maximum sleeping time an individual has (in seconds)
 	private double sleepingTimeMin; 
 	
@@ -130,10 +126,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 	 // To be set true if we're done with this activity  ---> Status can be requested via .isReady() function
 	private boolean ready = false; 
 	
-	// Random generator initalized with seed (if provided via settings file)
-	private Random rand;
-	
-	// Local day counter 
+	// Local day counter
 	private int dayCounter; 
 	
 	// Current time we still need to wait
@@ -169,13 +162,6 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 		else {
 			System.out.println("You didn't specify a value for the number of days!");
 			System.out.println("nbrOfDays: " + this.nbrOfDays); 
-		}
-		if (settings.contains(RNGSEED)) {
-			this.rngSeed = settings.getLong(RNGSEED);
-		}
-		else {
-			System.out.println("You didn't specify a value as a seed for the random number generator!");
-			System.out.println("rngSeed: " + this.rngSeed); 
 		}
 		if (settings.contains(NEIGHBORS_TO_VISIT)) {
 			this.neighborsToVisit = settings.getDouble(NEIGHBORS_TO_VISIT);
@@ -233,10 +219,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 			System.out.println("Reading the location files somehow failed - did you specify the correct path?"); 
 		}
 		
-		// Create a new random generator for this activity with the provided seed -> Important for ensuring reproducable results! 
-		this.rand = new Random(this.rngSeed);  
-		
-		// Set day counter to 0 since we start our simulation at day 0 
+		// Set day counter to 0 since we start our simulation at day 0
 		this.dayCounter = 0;
 		
 		// Set reliefVolunteering variable once and for all for the entire simulation period, based on reliefVolunteeringProb provided via default settings file
@@ -320,15 +303,14 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 
 	/**
 	 * Construct a new NonInjuredPopulationActivityMovement instance from a prototype
-	 * @param proto
+	 * @param prototype
 	 */
 	public NonInjuredPopulationActivityMovement(NonInjuredPopulationActivityMovement prototype) {
 		super(prototype);
 		this.pathFinder = prototype.pathFinder;
 		
 		// Loading settings via default settings file
-		this.rand = prototype.getRand(); 
-		this.dayLength = prototype.getDayLength(); 
+		this.dayLength = prototype.getDayLength();
 		this.nbrOfDays = prototype.getNbrOfDays(); 
 		this.neighborsToVisit = prototype.getNeighborsToVisit(); 
 		this.placesToVisit = prototype.getPlacesToVisit(); 
@@ -982,11 +964,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 	{
 		return this.foodWater; 
 	}
-	
-	public long getSeed() {
-		return this.rngSeed; 
-	}
-	
+
 	public double getNeighborsToVisit() {
 		return this.neighborsToVisit; 
 	}
@@ -996,21 +974,16 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 	}
 
 	// Get random int value, between provided min and max; returns 0 if invalid argument is provided 
-	public int getRandom(int min, int max) {
+	private int getRandom(int min, int max) {
 		if ((min >= 0) && (max > 0)) {
-			return this.rand.nextInt((max - min) + min);
+			return rng.nextInt(max - min) + min;
 		}
 		return 0; 
 	}
 
 	// Get random double value, between 0.0 and 1.0
-	public double getRandomDouble() {
-		return this.rand.nextDouble(); 
-	}
-	
-	// Return our random generator 
-	public Random getRand() {
-		return this.rand; 
+	private double getRandomDouble() {
+		return rng.nextDouble();
 	}
 	
 	public double getDayLength() {

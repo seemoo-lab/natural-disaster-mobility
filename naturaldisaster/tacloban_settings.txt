@@ -77,8 +77,6 @@ Group.dayLength = 86400
 Group.nbrOfDays = 6
 # Add an offset delay such that groups can start at different times
 Group.offsetStartDelay = 12000
-# Seed for movement models' pseudo random number generator -> Should definitly be set to some integer value
-Group.rngSeed = 1
 # WKT files required for movement of the different groups and their location on disk (inside the ONE folder)
 Group.hospitalLocationFile = data/Tacloban/tacloban_hospital_layer.wkt
 Group.homeLocationFile = data/Tacloban/tacloban_big_points.wkt
