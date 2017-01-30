@@ -359,15 +359,13 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 				}
 				if (SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) {
 					// We're done waiting, we can now go visit our next door neighbor
-					System.out.println("We are done waiting -> now visiting our next door neighbor");
 					// Go visit our neighbor
 					if (!visitedNeighbor) {
 						// Set visited neighbor to true
 						this.visitedNeighbor = true;
 
 						// Now we can calculate the PATH to go to the neighbor
-						System.out.println("Calculating PATH to go to the neighbor");
-					
+
 						// Calculation of path to the neighbor
 						SimMap map = super.getMap();
 						if (map == null) {
@@ -398,8 +396,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 									}
 							}
 							else {
-								System.out.println("Unfortunately we have no direct neighbor");
-								break; 
+								break;
 							}
 						}
 						catch (Throwable t)
@@ -415,8 +412,6 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateHomeWaitTime(); 
 						
-						System.out.println("Generated following PATH from HOME to the neighbor: " + path);
-						
 						return path;
 					}
 					
@@ -426,8 +421,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 				}
 				else {
 					// We still need to idle since we haven't waited enough
-					System.out.println(" - ACTIVE_AROUND_HOME mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case ACTIVE_AROUND_HOME_SURROUNDINGS: {
@@ -438,8 +432,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 						// Increasing the count of neighbors we already visited
 						this.visitedNeighborsCount++; 
 						// Now we can calculate the PATH to go to the neighbor
-						System.out.println("Calculating PATH to go to another neighbor");
-					
+
 						// Calculation of path to the neighbor
 						SimMap map = super.getMap();
 						if (map == null) {
@@ -472,8 +465,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 									}
 							}
 							else {
-								System.out.println("Unfortunately we have no direct neighbor");
-								break; 
+								break;
 							}
 						}
 						catch (Throwable t)
@@ -489,15 +481,11 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateHomeWaitTime(); 
 						
-						System.out.println("Generated following PATH from neighbor to neighbor: " + path);
-						System.out.println("Visiting neighbor number: " + this.visitedNeighborsCount);
-						
 						return path;
 					}
 					else {
 						// we visited enough neighbors, now switching to next mode
 						this.mode = MOVE_AROUND_FIND_FOOD_WATER;
-						System.out.println("We visited enough neighbors - Switching to MOVE_AROUND_FIND_FOOD_WATER mode"); 
 						// Calculating a waiting time to be sure that we don't arrive "too early"
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateHomeWaitTime(); 
@@ -506,8 +494,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 				}
 				else {
 					// We still need to idle at the neighbors place
-					System.out.println(" - ACTIVE_AROUND_HOME_SURROUNDINGS mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case MOVE_AROUND_FIND_FOOD_WATER: {
@@ -518,7 +505,6 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 						// Set beenToFoodPlace to true
 						this.beenToFoodPlace = true; 
 						// Now we can calculate the PATH to go to the next food and water distribution place
-						System.out.println("Calculating PATH to go a food and water distribution place");					
 
 						this.nextLocation = someFoodLocation.clone(); // Food location
 						
@@ -554,8 +540,6 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateHomeWaitTime(); 
 						
-						System.out.println("Generated following PATH to the food location: " + path);
-						
 						return path;
 					}
 					else {
@@ -563,12 +547,10 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 						if (reliefVolunteering) {
 							// Go to VOLUNTEER_FOR_CLEANING mode
 							this.mode = VOLUNTEER_FOR_CLEANING;
-							System.out.println("We've been to a food place - Switching to VOLUNTEER_FOR_CLEANING mode");
 						}
 						else {
 							// Go to MARCHING_IN_STREETS mode
 							this.mode = MARCHING_IN_STREETS;
-							System.out.println("We've been to a food place - Switching to MARCHING_IN_STREETS mode");
 						}
 						// Calculating a waiting time to be sure that we don't arrive "too early"
 						this.startedActivityTime = SimClock.getTime();
@@ -578,8 +560,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 				}
 				else {
 					// We still need to idle when being at a food distribution place
-					System.out.println(" - MOVE_AROUND_FIND_FOOD_WATER mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case VOLUNTEER_FOR_CLEANING: {
@@ -592,8 +573,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 						this.placesCount++; 
 						
 						// Now we can calculate the PATH to go to one volunteering place
-						System.out.println("Calculating PATH to go volunteering");
-						
+
 						// Calculation of path to volunteering place
 						SimMap map = super.getMap();
 						if (map == null) {
@@ -651,22 +631,18 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateVolunteeringWaitTime(); 
 						
-						System.out.println("Generated following PATH when going volunteering: " + path);
-						
 						return path;
 					}
 					else {
 						// We're done volunteering -> now go back home
 						this.mode = GO_HOME; 
-						System.out.println("Going back home");
-						this.waitingTime = generateHomeWaitTime(); 
+						this.waitingTime = generateHomeWaitTime();
 						this.startedActivityTime = SimClock.getTime(); 
 					}
 				}
 				else {
 					// We still need to idle when being a volunteer
-					System.out.println(" - VOLUNTEER_FOR_CLEANING mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case MARCHING_IN_STREETS: {
@@ -675,13 +651,12 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 					// We waited long enough, we are now going to walk around the streets helping our neighborhood while patrolling in the streets
 					
 					// Now we can calculate the PATH to go marching through the streets
-					System.out.println("Calculating PATH to go marching through the streets");
 
 					// Calculation of path for marching through the streets
 					SimMap map = super.getMap();
 					if (map == null) {
 						System.out.println("Error while getting map!");
-							return null;
+						return null;
 					}
 					
 					// The node we want to go to
@@ -706,8 +681,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 						// After visiting one last place we jump to the next mode and we're done for today -> now go back home
 						this.mode = GO_HOME;
 						this.placesCount++;
-						System.out.println("Going back home soon, after visiting this one last place");
-						this.waitingTime = generateHomeWaitTime(); 
+						this.waitingTime = generateHomeWaitTime();
 						this.startedActivityTime = SimClock.getTime(); 
 					}
 					
@@ -723,7 +697,6 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 						}
 						catch (Throwable t)
 						{
-							System.out.println("No such location - chosing a new, but random, location!");
 							// Setting a new random neighbor to avoid null pointer
 							int firstRandom = this.getRandom(0,this.mainPoints.size()-1);
 							this.nextLocation = this.mainPoints.get(firstRandom).clone();
@@ -754,9 +727,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 								furthestNeighbor = neighbors.get(j);
 							}
 						}
-						System.out.println("Distance to closest neighbor calculated to be: " + closestDistance);
-						System.out.println("Distance to furthest neighbor calculated to be: " + furthestDistance);
-						
+
 						if (closestNeighbor == null) {
 							// Avoid the very rare case that we have so few neighbors that we would run in a null pointer exception otherwise
 							closestNeighbor = neighbors.get(0);
@@ -817,13 +788,11 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 					// Saving the actual activity time
 					this.startedActivityTime = SimClock.getTime();
 					
-					System.out.println("Generated following PATH when going patrolling: " + path);
 					return path;
 				}
 				else {
 					// We still need to idle while patrolling in the streets
-					System.out.println(" - MARCHING_IN_STREETS mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case GO_HOME: {
@@ -832,13 +801,12 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 					// Now we are sure that we waited long enough -> Go home and then sleep there 
 					
 					// Now we can calculate the PATH to go back home	
-					System.out.println("Calculating PATH to go back home");
-					
+
 					// Calculation of path back home
 					SimMap map = super.getMap();
 					if (map == null) {
 						System.out.println("Error while getting map!");
-							return null;
+						return null;
 					}
 					
 					// Going back to the home location
@@ -869,14 +837,11 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 					// Calculating a waiting time to be sure that we don't arrive "too early" at our home location!
 					this.waitingTime = generateHomeWaitTime();
 					this.startedActivityTime = SimClock.getTime(); 
-					System.out.println("Going home!");
-					System.out.println("Generated following PATH to HOME: " + path);
 					return path;
 				}
 				else {
 					// We still need to idle a bit
-					System.out.println(" - GO_HOME mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case IDLE_MODE: {
@@ -896,12 +861,10 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 					// Reset mode such that activity can restart tomorrow 
 					this.mode = MOVE_AROUND_FIND_FOOD_WATER; 
 					this.startedActivityTime = -1; 
-					System.out.println(" - IDLE_MODE mode - Should now be over - Switching to sleep activity now");
 				}
 				else {
 					// We still need to idle as it's to early to go to sleep again
-					System.out.println(" - IDLE_MODE mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 		  }
@@ -921,15 +884,13 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 	protected double generateHomeWaitTime() {
 		// We generate the waiting time we want to spent at home
 		double tmpWaitTime = this.getRandomDouble()*2000;
-		System.out.println("Generated a - generateHomeWaitTime() - NON-INJURED POPULATION - AT HOME - waiting time of: " + tmpWaitTime); 
-		return tmpWaitTime; 
+		return tmpWaitTime;
 	}
 	
 	protected double generateVolunteeringWaitTime() {
 		// We generate the waiting time we want to spent volunteering
 		double tmpWaitTime = this.getRandomDouble()*5000;
-		System.out.println("Generated a - generateVolunteeringWaitTime() - NON-INJURED POPULATION - waiting time of: " + tmpWaitTime); 
-		return tmpWaitTime; 
+		return tmpWaitTime;
 	}
 	
 	@Override

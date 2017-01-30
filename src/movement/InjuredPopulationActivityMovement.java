@@ -292,13 +292,11 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 				if (SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) {
 					// We're done waiting, we can now switch to the next mode (GO_TO_HOSPITAL)
 					this.mode = GO_TO_HOSPITAL; 
-					System.out.println("We are done waiting -> going to hospital!");
-					break; 
+					break;
 				}
 				else {
 					// We still need to idle since we haven't waited enough
-					System.out.println(" - STAY_AT_HOME mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case GO_TO_HOSPITAL: {
@@ -315,8 +313,7 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 							this.mode = STAY_AT_HOSPITAL;
 
 						// Now we can calculate the PATH to go to that specific hospital	
-						System.out.println("Calculating PATH to go to hospital");
-					
+
 						// Calculation of path to hospital
 						SimMap map = super.getMap();
 						if (map == null) {
@@ -349,15 +346,12 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateHomeWaitTime(); 
 						
-						System.out.println("Generated following PATH from HOME to Hospital: " + path);
-						
 						return path;
 					}
 				}
 				else {
 					// We're not able to go to the hospital on our own!  -> We can now switch to the next mode (TO_ILL_TO_GO_TO_HOSPITAL)
 					this.mode = TO_ILL_TO_GO_TO_HOSPITAL; 
-					System.out.println("We are to ill to go to the hospital -> TO_ILL_TO_GO_TO_HOSPITAL!");
 					// Create a larger waiting time since we just idle in this mode
 					this.waitingTime = generateHospitalWaitTime() * 2; 
 					this.startedActivityTime = SimClock.getTime(); 
@@ -369,16 +363,13 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 					// We are sure that we arrived at the hospital, no preparing for leaving later on 
 					// Create a larger waiting time since we assume we stay at the hospital for at least some time
 					this.waitingTime = generateHospitalWaitTime(); 
-					System.out.println("Generated a STAY_AT_HOSPITAL waiting time at the hospital of : " + this.waitingTime);
-					// Switching to GO_HOME mode 
+					// Switching to GO_HOME mode
 					this.mode = GO_HOME;
-					System.out.println("We will wait at the hospital for " + this.waitingTime + " and then -> GO_HOME!");
-					this.startedActivityTime = SimClock.getTime(); 
+					this.startedActivityTime = SimClock.getTime();
 				}
 				else {
 					// We still need to idle at the hospital
-					System.out.println(" - STAY_AT_HOSPITAL mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case GO_HOME: {
@@ -390,13 +381,12 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 					this.beenToHospital = false; 
 					
 					// Now we can calculate the PATH to go back home	
-					System.out.println("Calculating PATH to go back home");
-					
+
 					// Calculation of path back home
 					SimMap map = super.getMap();
 					if (map == null) {
 						System.out.println("Error while getting map!");
-							return null;
+						return null;
 					}
 					
 					// Going back to the home location
@@ -427,14 +417,11 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 					// Calculating a waiting time to be sure that we don't arrive "too early" at our home location! (in case the home and the hospital location would be next door)
 					this.waitingTime = generateHomeWaitTime();
 					this.startedActivityTime = SimClock.getTime(); 
-					System.out.println("Going home after hospital!");
-					System.out.println("Generated following PATH from Hospital to HOME: " + path);
 					return path;
 				}
 				else {
 					// We still need to idle at the hospital
-					System.out.println(" - GO_HOME mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case IDLE_MODE: {
@@ -449,12 +436,10 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 					this.start = false; 
 					this.mode = STAY_AT_HOME; 
 					this.startedActivityTime = -1; 
-					System.out.println(" - IDLE_MODE mode - Should now be over - Switching to sleep activity now");
 				}
 				else {
 					// We still need to idle as it's to early to go to sleep again
-					System.out.println(" - IDLE_MODE mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case TO_ILL_TO_GO_TO_HOSPITAL: {
@@ -464,8 +449,7 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 					// We're not able to go to hospital on our own!
 					if ((SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) && (SimClock.getTime() > (this.dayLength*(this.dayCounter+1)))) {
 						// Basically we're done waiting, but since there is nothing more to do we continue to wait
-						System.out.println("Generated a waiting time in TO_ILL_TO_GO_TO_HOSPITAL mode - forever - of " + waitingTime);
-						this.startedActivityTime = SimClock.getTime(); 
+						this.startedActivityTime = SimClock.getTime();
 						ready = true; 
 					}
 				}
@@ -484,15 +468,13 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 	protected double generateHospitalWaitTime() {
 		// We generate the waiting time we want to spent at the hospital 
 		double tmpWaitTime = this.getRandomDouble()*20000;
-		System.out.println("Generated a - generateHospitalWaitTime() - INJURED POPULATION - AT HOSPITAL - waiting time of: " + tmpWaitTime); 
-		return tmpWaitTime; 
+		return tmpWaitTime;
 	}
 	
 	protected double generateHomeWaitTime() {
 		// We generate the waiting time we want to spent at home
 		double tmpWaitTime = this.getRandomDouble()*2000;
-		System.out.println("Generated a - generateHomeWaitTime() - INJURED POPULATION - AT HOME - waiting time of: " + tmpWaitTime); 
-		return tmpWaitTime; 
+		return tmpWaitTime;
 	}
 	
 	@Override

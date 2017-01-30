@@ -491,13 +491,12 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 					// Now we are sure that we waited long enough -> Going to OSOCC
 					
 					// Now we can calculate the PATH to OSOCC
-					System.out.println("Calculating PATH to OSOCC");
-					
+
 					// Calculation of path to OSOCC
 					SimMap map = super.getMap();
 					if (map == null) {
 						System.out.println("Error while getting map!");
-							return null;
+						return null;
 					}
 					
 					// Going to OSOCC
@@ -528,14 +527,11 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 					// Calculating a waiting time to be sure that we don't arrive "too early" at the OSOCC location!
 					this.waitingTime = generateHomeWaitTime();
 					this.startedActivityTime = SimClock.getTime(); 
-					System.out.println("Going to OSOCC!");
-					System.out.println("Generated following PATH to OSOCC: " + path);
 					return path;
 				}
 				else {
 					// We still need to idle a bit
-					System.out.println(" - GO_TO_OSOCC preparations mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case GO_TO_TOWN_HALL: {
@@ -545,13 +541,12 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 					// Now we are sure that we waited long enough -> Go to town hall
 					
 					// Now we can calculate the PATH to town hall
-					System.out.println("Calculating PATH to town hall");
-					
+
 					// Calculation of path to town hall
 					SimMap map = super.getMap();
 					if (map == null) {
 						System.out.println("Error while getting map!");
-							return null;
+						return null;
 					}
 					
 					// Going to town hall
@@ -582,14 +577,11 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 					// Calculating a waiting time to be sure that we don't arrive "too early"
 					this.waitingTime = generateHomeWaitTime();
 					this.startedActivityTime = SimClock.getTime(); 
-					System.out.println("Going to town hall!");
-					System.out.println("Generated following PATH to town hall: " + path);
 					return path;
 				}
 				else {
 					// We still need to idle a bit
-					System.out.println(" - GO_TO_OSOCC mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case GO_TO_BASE_CAMP: {
@@ -598,13 +590,12 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 					// Now we are sure that we waited long enough -> Go to base camp
 					
 					// Now we can calculate the PATH to base camp
-					System.out.println("Calculating PATH to base camp");
-					
+
 					// Calculation of path to base camp
 					SimMap map = super.getMap();
 					if (map == null) {
 						System.out.println("Error while getting map!");
-							return null;
+						return null;
 					}
 					
 					// Going to base camp
@@ -642,14 +633,11 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 					// Calculating a waiting time to be sure that we don't arrive "too early"
 					this.waitingTime = generateHomeWaitTime();
 					this.startedActivityTime = SimClock.getTime(); 
-					System.out.println("Going to base camp!");
-					System.out.println("Generated following PATH to base camp: " + path);
 					return path;
 				}
 				else {
 					// We still need to idle a bit
-					System.out.println(" - GO_TO_TOWN_HALL mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case RECONNAISSANCE_MISSIONS: {
@@ -666,11 +654,9 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 					if (this.placesToVisit != this.placesCount) {
 						// Increasing the count of places we already visited while exploring the area
 						this.placesCount++; 
-						System.out.println("We are done waiting -> we now go on reconnaissance mission and explore the area");
-	
+
 						// Now we can calculate the PATH to go on reconnaissance mission
-						System.out.println("Calculating PATH to go on reconnaissance mission");
-						
+
 						// Selecting a main point location for the reconnaissance mission
 						int firstRandom = this.getRandom(0,this.mainPoints.size()-1);
 						// Setting nextLocation to mainPoints location
@@ -707,14 +693,11 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateHomeWaitTime(); 
 						
-						System.out.println("Generated following PATH to the reconnaissance mission location: " + path);
-	
 						return path;
 					}
 					else {
 						// we visited enough places for exploring the area, now go back home 
 						this.mode = GO_HOME;
-						System.out.println("We visited enough places for exploring the area - Switching to GO_HOME mode"); 
 						// Calculating a waiting time to be sure that we don't arrive "too early"
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateHomeWaitTime(); 
@@ -723,8 +706,7 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 				}
 				else {
 					// We still need to idle since we haven't waited enough
-					System.out.println(" - GO_TO_BASE_CAMP mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case GO_HOME: {
@@ -733,13 +715,12 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 					// Now we are sure that we waited long enough -> Go home and then sleep there 
 					
 					// Now we can calculate the PATH to go back home	
-					System.out.println("Calculating PATH to go back home");
-					
+
 					// Calculation of path back home
 					SimMap map = super.getMap();
 					if (map == null) {
 						System.out.println("Error while getting map!");
-							return null;
+						return null;
 					}
 					
 					// Going back to the home location
@@ -770,14 +751,11 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 					// Calculating a waiting time to be sure that we don't arrive "too early" at our home location!
 					this.waitingTime = generateHomeWaitTime();
 					this.startedActivityTime = SimClock.getTime(); 
-					System.out.println("Going home!");
-					System.out.println("Generated following PATH to HOME: " + path);
 					return path;
 				}
 				else {
 					// We still need to idle a bit
-					System.out.println(" - TO EARLY TO GO HOME - Stil active"); 
-					break; 
+					break;
 				}
 			}
 			case IDLE_MODE: {
@@ -815,12 +793,10 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 					this.start = false; 
 
 					this.startedActivityTime = -1;
-					System.out.println(" - IDLE_MODE mode - Should now be over - Switching to sleep activity now");
 				}
 				else {
 					// We still need to idle as it's to early to go to sleep again
-					System.out.println(" - IDLE_MODE mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case FOOD_WATER_DISTRIBUTION: {
@@ -833,12 +809,10 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 					this.startedActivityTime = SimClock.getTime();
 				}
 				if (SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) {
-					// We're done waiting, we can now go to distribute food and water
-						System.out.println("We are done waiting -> we now go distribute food and water");
-	
+						// We're done waiting, we can now go to distribute food and water
+
 						// Now we can calculate the PATH to go distribute food and water
-						System.out.println("Calculating PATH to go distribute food and water");
-						
+
 						// Selecting a location for the food and water distribution 
 						int firstRandom = this.getRandom(0,this.foodWater.size()-1);
 						// Setting nextLocation to a foodWater location
@@ -875,7 +849,6 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateLongWaitTime(); 
 						
-						System.out.println("Generated following PATH to the food and water distribution location: " + path);
 						// Going home after the longer waiting time has passed later on
 						this.mode = GO_HOME;
 						
@@ -883,8 +856,7 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 					}
 				else {
 					// We still need to idle since we haven't waited enough
-					System.out.println(" - GO_TO_BASE_CAMP mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case ORGANIZE_BURIAL: {
@@ -901,11 +873,9 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 					if (this.placesToVisit != this.placesCount) {
 						// Increasing the count of burial places we already went to
 						this.placesCount++;
-						System.out.println("We are done waiting -> we now go to go a burial location");
-	
+
 						// Now we can calculate the PATH to go a burial location
-						System.out.println("Calculating PATH to a burial location");
-						
+
 						// Selecting a burial location
 						int firstRandom = this.getRandom(0,this.burials.size()-1);
 						// Setting nextLocation to burials location
@@ -927,7 +897,7 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 			
 							for (MapNode node : nodePath) {
 								path.addWaypoint(node.getLocation());
-								}
+							}
 						}
 						catch (Throwable t)
 						{
@@ -942,14 +912,11 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateHomeWaitTime(); 
 						
-						System.out.println("Generated following PATH to the burial location: " + path);
-	
 						return path;
 					}
 					else {
 						// we've been to enough burial places, now go back home 
 						this.mode = GO_HOME;
-						System.out.println("We been to enough burial places - Switching to GO_HOME mode"); 
 						// Calculating a waiting time to be sure that we don't arrive "too early"
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateHomeWaitTime(); 
@@ -958,8 +925,7 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 				}
 				else {
 					// We still need to idle since we haven't waited enough
-					System.out.println(" - GO_TO_BASE_CAMP mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 		  }
@@ -979,15 +945,13 @@ public class OfficialsActivityMovement extends MapBasedMovement implements Switc
 	protected double generateHomeWaitTime() {
 		// We generate the waiting time we want to spent at home
 		double tmpWaitTime = this.getRandomDouble()*8000;
-		System.out.println("Generated a - generateHomeWaitTime() - OFFICIALS - AT HOME - waiting time of: " + tmpWaitTime); 
-		return tmpWaitTime; 
+		return tmpWaitTime;
 	}
 	
 	protected double generateLongWaitTime() {
 		// We generate a long waiting time 
 		double tmpWaitTime = this.getRandomDouble()*20000;
-		System.out.println("Generated a - generateLongWaitTime() - OFFICIALS - waiting time of: " + tmpWaitTime); 
-		return tmpWaitTime; 
+		return tmpWaitTime;
 	}
 	
 	

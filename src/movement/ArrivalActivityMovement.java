@@ -303,7 +303,6 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 					
 					// Saving the exact timeslot we started this activity 
 					this.startedActivityTime = SimClock.getTime();
-					System.out.println("We just arrived at the airport"); 				
 				}
 				if (SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) {
 					// We're done waiting, we can now go to the RDC 
@@ -311,13 +310,11 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateHomeWaitTime() / 2; 
 						this.mode = GO_TO_RDC;
-						System.out.println("We waited long enough - Switching to GO_TO_RDC mode"); 
-						break; 
+						break;
 				}
 				else {
 					// We still need to idle since we haven't waited enough
-					System.out.println(" - ARRIVAL_MODE mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case GO_TO_RDC: {
@@ -326,8 +323,7 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 					// Now we are sure that we waited long enough -> Go to the RDC now
 					
 					// Now we can calculate the PATH to the RDC
-					System.out.println("Calculating PATH to the RDC");
-					
+
 					// Calculation of path to the RDC
 					SimMap map = super.getMap();
 					if (map == null) {
@@ -363,14 +359,11 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 					// Calculating a longer waiting time to be sure that we don't head "too early" to the OSOCC
 					this.waitingTime = generateHomeWaitTime() * 10;
 					this.startedActivityTime = SimClock.getTime(); 
-					System.out.println("Going to the RDC now!");
-					System.out.println("Generated following PATH to the RDC: " + path);
 					return path;
 				}
 				else {
 					// We still need to idle a bit
-					System.out.println(" - GO_TO_RDC mode preparation - Active - Waiting"); 
-					break; 
+					break;
 				}
 			} 
 			case GO_TO_OSOCC: {
@@ -379,8 +372,7 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 					// Now we are sure that we waited long enough -> Go to OSOCC 
 					
 					// Now we can calculate the PATH to go to OSOCC 
-					System.out.println("Calculating PATH to go to OSOCC ");
-					
+
 					// Calculation of path to OSOCC 
 					SimMap map = super.getMap();
 					if (map == null) {
@@ -416,14 +408,11 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 					// Calculating a longer waiting time to be sure that we don't head "too early" to the base camp
 					this.waitingTime = generateHomeWaitTime() * 10;
 					this.startedActivityTime = SimClock.getTime(); 
-					System.out.println("Going to the OSOCC now!");
-					System.out.println("Generated following PATH to the OSOCC: " + path);
 					return path;
 				}
 				else {
 					// We still need to idle a bit
-					System.out.println(" - GO_TO_RDC mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			} 
 			case GO_TO_BASE_CAMP: {
@@ -432,8 +421,7 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 					// Now we are sure that we waited long enough -> Go to base camp
 					
 					// Now we can calculate the PATH to base camp
-					System.out.println("Calculating PATH to base camp");
-					
+
 					// Calculation of path to base camp
 					SimMap map = super.getMap();
 					if (map == null) {
@@ -469,14 +457,11 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 					// Calculating a longer waiting time to be sure that we don't switch "too early" to the idle mode
 					this.waitingTime = generateHomeWaitTime() * 10;
 					this.startedActivityTime = SimClock.getTime(); 
-					System.out.println("Going to the base camp now!");
-					System.out.println("Generated following PATH to the base camp : " + path);
 					return path;
 				}
 				else {
 					// We still need to idle a bit
-					System.out.println(" - GO_TO_OSOCC mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case IDLE_MODE: {
@@ -485,7 +470,6 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 					// Now we are sure that we waited long enough -> Switch to another activity
 					ready = true;
 					start = false; 
-					System.out.println("ARRIVAL activity done ----------> Switching to next activity!");
 				}
 			}
 		  }
@@ -505,8 +489,7 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 	protected double generateHomeWaitTime() {
 		// We generate the waiting time we want to spent at home
 		double tmpWaitTime = this.getRandomDouble()*2000;
-		System.out.println("Generated a - generateHomeWaitTime() - ARRIVAL AT AIRPORT ACTIVITY - waiting time of: " + tmpWaitTime); 
-		return tmpWaitTime; 
+		return tmpWaitTime;
 	}
 	
 	@Override

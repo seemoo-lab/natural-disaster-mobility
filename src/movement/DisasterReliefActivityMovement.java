@@ -413,13 +413,12 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 					// Now we are sure that we waited long enough -> Going to OSOCC
 					
 					// Now we can calculate the PATH to OSOCC
-					System.out.println("Calculating PATH to OSOCC");
-					
+
 					// Calculation of path to OSOCC
 					SimMap map = super.getMap();
 					if (map == null) {
 						System.out.println("Error while getting map!");
-							return null;
+						return null;
 					}
 					
 					// Going to OSOCC
@@ -450,14 +449,11 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 					// Calculating a waiting time to be sure that we don't arrive "too early" at the OSOCC location!
 					this.waitingTime = generateHomeWaitTime();
 					this.startedActivityTime = SimClock.getTime(); 
-					System.out.println("Going to OSOCC!");
-					System.out.println("Generated following PATH to OSOCC: " + path);
 					return path;
 				}
 				else {
 					// We still need to idle a bit
-					System.out.println(" - GO_TO_OSOCC preparations mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case GO_TO_TOWN_HALL: {
@@ -467,13 +463,12 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 					// Now we are sure that we waited long enough -> Go to town hall
 					
 					// Now we can calculate the PATH to town hall
-					System.out.println("Calculating PATH to town hall");
-					
+
 					// Calculation of path to town hall
 					SimMap map = super.getMap();
 					if (map == null) {
 						System.out.println("Error while getting map!");
-							return null;
+						return null;
 					}
 					
 					// Going to town hall
@@ -511,25 +506,20 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 					// Calculating a waiting time to be sure that we don't arrive "too early"
 					this.waitingTime = generateHomeWaitTime();
 					this.startedActivityTime = SimClock.getTime(); 
-					System.out.println("Going to town hall!");
-					System.out.println("Generated following PATH to town hall: " + path);
 					return path;
 				}
 				else {
 					// We still need to idle a bit
-					System.out.println(" - GO_TO_OSOCC mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case FOOD_WATER_DISTRIBUTION: {
 				// FOOD_WATER_DISTRIBUTION -> We go to food and water distribution locations (for helping with the distribution)
 				if (SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) {
 					// We're done waiting, we can now go to distribute food and water
-						System.out.println("We are done waiting -> we now go distribute food and water");
-	
+
 						// Now we can calculate the PATH to go distribute food and water
-						System.out.println("Calculating PATH to go distribute food and water");
-						
+
 						// Selecting a location for the food and water distribution 
 						int firstRandom = this.getRandom(0,this.foodWater.size()-1);
 						// Setting nextLocation to a foodWater location
@@ -566,7 +556,6 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateLongWaitTime(); 
 						
-						System.out.println("Generated following PATH to the food and water distribution location: " + path);
 						// Going home after the longer waiting time has passed later on
 						this.mode = GO_HOME;
 						
@@ -574,8 +563,7 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 					}
 				else {
 					// We still need to idle since we haven't waited enough
-					System.out.println(" - FOOD_WATER_DISTRIBUTION mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case MARCHING_IN_STREETS: {
@@ -584,7 +572,6 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 					// We waited long enough, we are now going to walk around the streets helping our neighborhood while marching through the city's streets
 					
 					// Now we can calculate the PATH to go marching through the streets
-					System.out.println("Calculating PATH to go marching through the streets");
 
 					// Calculation of path for marching through the streets
 					SimMap map = super.getMap();
@@ -615,8 +602,7 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 						// After visiting one last place we jump to the next mode and we're done for today -> now go back home
 						this.mode = GO_HOME;
 						this.placesCount++;
-						System.out.println("Going back home soon, after visiting this one last place");
-						this.waitingTime = generateHomeWaitTime(); 
+						this.waitingTime = generateHomeWaitTime();
 						this.startedActivityTime = SimClock.getTime(); 
 					}
 					
@@ -663,9 +649,7 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 								furthestNeighbor = neighbors.get(j);
 							}
 						}
-						System.out.println("Distance to closest neighbor calculated to be: " + closestDistance);
-						System.out.println("Distance to furthest neighbor calculated to be: " + furthestDistance);
-						
+
 						if (closestNeighbor == null) {
 							// Avoid the very rare case that we have so few neighbors that we would run in a null pointer exception otherwise
 							closestNeighbor = neighbors.get(0);
@@ -726,13 +710,11 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 					// Saving the actual activity time
 					this.startedActivityTime = SimClock.getTime();
 					
-					System.out.println("Generated following PATH when going patrolling: " + path);
 					return path;
 				}
 				else {
 					// We still need to idle while marching through the streets
-					System.out.println(" - MARCHING_IN_STREETS mode - Active - Waiting");
-					break; 
+					break;
 				}
 			}
 			case GO_HOME: {
@@ -741,8 +723,7 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 					// Now we are sure that we waited long enough -> Go home and then sleep there 
 					
 					// Now we can calculate the PATH to go back home	
-					System.out.println("Calculating PATH to go back home");
-					
+
 					// Calculation of path back home
 					SimMap map = super.getMap();
 					if (map == null) {
@@ -778,14 +759,11 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 					// Calculating a waiting time to be sure that we don't arrive "too early" at our home location!
 					this.waitingTime = generateHomeWaitTime();
 					this.startedActivityTime = SimClock.getTime(); 
-					System.out.println("Going home!");
-					System.out.println("Generated following PATH to HOME: " + path);
 					return path;
 				}
 				else {
 					// We still need to idle a bit
-					System.out.println(" - TO EARLY TO GO HOME - Stil active"); 
-					break; 
+					break;
 				}
 			}
 			case IDLE_MODE: {
@@ -805,12 +783,10 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 					this.start = false; 
 
 					this.startedActivityTime = -1; 
-					System.out.println(" - IDLE_MODE mode - Should now be over - Switching to sleep activity now");
 				}
 				else {
 					// We still need to idle as it's to early to go to sleep again
-					System.out.println(" - IDLE_MODE mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 		  }
@@ -830,15 +806,13 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 	protected double generateHomeWaitTime() {
 		// We generate the waiting time we want to spent at home
 		double tmpWaitTime = this.getRandomDouble()*8000;
-		System.out.println("Generated a - generateHomeWaitTime() - DISASTER RELIEF ORGANIZATION - AT HOME - waiting time of: " + tmpWaitTime); 
-		return tmpWaitTime; 
+		return tmpWaitTime;
 	}
 	
 	protected double generateLongWaitTime() {
 		// We generate a long waiting time 
 		double tmpWaitTime = this.getRandomDouble()*20000;
-		System.out.println("Generated a - generateLongWaitTime() - DISASTER RELIEF ORGANIZATION - waiting time of: " + tmpWaitTime); 
-		return tmpWaitTime; 
+		return tmpWaitTime;
 	}
 		
 	@Override

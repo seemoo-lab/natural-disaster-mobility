@@ -267,8 +267,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 		if ((SimClock.getTime() > ((this.dayCounter + 1) * this.dayLength)) && (!(this.dayCounter == this.nbrOfDays))) {
 			// Simulation is not yet finished but another day passed by
 			this.dayCounter++; 
-			System.out.println("Another day passed by! - newOrders() - Value of this.dayCounter is now = " + this.dayCounter);
-			// Update the sleep activity since counter is usually updated after we finished the sleep activity -> need to be updated retroactively 
+			// Update the sleep activity since counter is usually updated after we finished the sleep activity -> need to be updated retroactively
 			goSleepMM.updateDayCounter(this.dayCounter); 
 		}
 		
@@ -280,11 +279,6 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 				// If true we are done with sleeping and want to become active again since the next day has just started
 				if (this.dayCounter == this.nbrOfDays){
 					// If we end up here the simulation is finished -> we idle forever  
-					System.out.println("------------SIMULATION IS OVER------------");
-					System.out.println("------------SIMULATION IS OVER------------");
-					System.out.println("------------SIMULATION IS OVER------------");
-					System.out.println("------------SIMULATION IS OVER------------");
-					System.out.println("------------SIMULATION IS OVER------------");
 					break;
 				}
 				if (groupID == SCIENTISTS_GROUP_ID) {
@@ -442,7 +436,6 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 					setCurrentMovementModel(goSleepMM);
 					mode = SLEEP_MODE;
 					goSleepMM.Activate(this.dayCounter); 
-					System.out.println("Sleeping in diaster relief mode");
 				}
 			}			
 			break;
@@ -456,7 +449,6 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 					setCurrentMovementModel(goSleepMM);
 					mode = SLEEP_MODE;
 					goSleepMM.Activate(this.dayCounter); 
-					System.out.println("Sleeping in scientific mode");
 				}
 				if (groupID == INJURED_GROUP_ID) {
 					// throw error since we should'nt be in scientific mode at any time
@@ -484,7 +476,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 				// If true we are done with disaster relief and already at the airport -> so we solely idle here 
 				// Set activity according to group ID
 				if (groupID == SCIENTISTS_GROUP_ID) {
-					System.out.println("Simulation is over for this scientist node - Idle mode ON"); 
+					//System.out.println("Simulation is over for this scientist node - Idle mode ON");
 				}
 				if (groupID == INJURED_GROUP_ID) {
 					// Throw an error since we shouldn't use this mode
@@ -493,16 +485,16 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 					// Throw an error since we shouldn't use this mode
 				}
 				if (groupID == SEARCH_RESCUE_GROUP_ID) {
-					System.out.println("Simulation is over for this search and rescue node - Idle mode ON"); 
+					//System.out.println("Simulation is over for this search and rescue node - Idle mode ON");
 				}
 				if (groupID == GOVERNMENT_GROUP_ID) {
-					System.out.println("Simulation is over for this officials node - Idle mode ON"); 
+					//System.out.println("Simulation is over for this officials node - Idle mode ON");
 				}
 				if (groupID == UN_GROUP_ID) {
-					System.out.println("Simulation is over for this officials node - Idle mode ON"); 
+					//System.out.println("Simulation is over for this officials node - Idle mode ON");
 				}
 				if (groupID == DRO_GROUP_ID) {
-					System.out.println("Simulation is over for this disaster relief organization member node - Idle mode ON"); 
+					//System.out.println("Simulation is over for this disaster relief organization member node - Idle mode ON");
 				}
 			}			
 			break;
@@ -528,14 +520,12 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 					setCurrentMovementModel(goSleepMM);
 					mode = SLEEP_MODE;
 					goSleepMM.Activate(this.dayCounter); 
-					System.out.println("Sleeping in governement mode");
 				}
 				if (groupID == UN_GROUP_ID) {
 					// Day is over, going home to sleep -> Activating sleep activity
 					setCurrentMovementModel(goSleepMM);
 					mode = SLEEP_MODE;
 					goSleepMM.Activate(this.dayCounter); 
-					System.out.println("Sleeping in UN group mode");
 				}
 				if (groupID == DRO_GROUP_ID) {
 					// throw error since we should'nt be in officials mode at any time
@@ -561,7 +551,6 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 					setCurrentMovementModel(goSleepMM);
 					mode = SLEEP_MODE;
 					goSleepMM.Activate(this.dayCounter); 
-					System.out.println("Sleeping in search and rescue mode");
 				}
 				if (groupID == GOVERNMENT_GROUP_ID) {
 					// throw error since we should'nt be in searchRescue mode at any time
@@ -586,8 +575,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 					// Day is over, going home to sleep -> Activating sleep activity
 					setCurrentMovementModel(goSleepMM);
 					mode = SLEEP_MODE;
-					System.out.println("Switching back to sleep activity - Starting sleep in injured mode");
-					goSleepMM.Activate(this.dayCounter); 
+					goSleepMM.Activate(this.dayCounter);
 				}
 				if (groupID == NONINJURED_GROUP_ID) {
 					// throw error since we should'nt be in injured mode at any time
@@ -621,8 +609,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 					// Day is over, going home to sleep -> Activating sleep activity
 					setCurrentMovementModel(goSleepMM);
 					mode = SLEEP_MODE;
-					goSleepMM.Activate(this.dayCounter); 
-					System.out.println("Sleeping in non injured mode");
+					goSleepMM.Activate(this.dayCounter);
 				}
 				if (groupID == SEARCH_RESCUE_GROUP_ID) {
 					// throw error since we should'nt be in non-injured mode at any time

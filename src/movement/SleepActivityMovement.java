@@ -124,7 +124,6 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 		
 		// Adding potential offset (provided via default settings file) for the first night of sleep
 		this.sleepTime += this.offsetStartDelay; 
-		System.out.println("Calculated initial sleep time is: " + this.sleepTime); 
 
 		// Since we start our day sleeping at home -> we're not yet done sleeping
 		this.doneSleeping = false; 
@@ -157,8 +156,7 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 		
 		// Adding potential offset (provided via default settings file) for the first night of sleep
 		this.sleepTime += this.offsetStartDelay; 
-		System.out.println("Calculated initial sleep time is: " + this.sleepTime); 
-		
+
 		// Since we start our day sleeping at home -> we're not yet done sleeping
 		this.doneSleeping = false; 
 		this.startedActivityTime = -1; 
@@ -172,10 +170,6 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 		if ((SimClock.getTime() > 0) && (start) && (this.dayCounter != this.nbrOfDays)) {    
 				if (SimClock.getTime() > ((this.dayCounter * this.dayLength) + this.sleepTime)) {
 					// If we are here we are sure that we slept enough for today
-					System.out.println("Done sleeping -> getting back to work now!");
-					System.out.println("this.dayCounter --- " + this.dayCounter);
-					System.out.println("this.dayLength --- " + this.dayLength);
-					System.out.println("this.dayCounter * this.dayLength --- " + ((this.dayCounter * this.dayLength) + this.sleepTime));
 					this.doneSleeping = true;
 					this.ready = true;
 					this.start = false;
@@ -183,7 +177,6 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 				else if (SimClock.getTime() < ((this.dayCounter * this.dayLength) + this.sleepTime)) {
 					// If we are here we are sure that we still need to sleep a bit more for today
 					// So me just idle here 
-					System.out.println("Still sleeping!");
 				}
 			}
 
@@ -194,16 +187,13 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 			this.start = false; 
 			this.doneSleeping = false;
 			this.sleepTime = -1; 
-			System.out.println("Simulation is over - Node sleeps forever now!");
-			this.sleepTime = Integer.MAX_VALUE; 
+			this.sleepTime = Integer.MAX_VALUE;
 			if (SimClock.getTime() >= this.sleepTime) {
 				// We reached the end of the universe ;)  
-				System.out.println("You reached the end of Integer.MAX_VALUE!");
 			}
 		}
 		else if (!start) {
 			// Done sleeping, we want to switch back to another activtiy be the main activity hasn't switched movement models yet  
-			System.out.println("Sleeping is over - Waiting for main activity to be called again with the next iteration!");
 		}
 		return null; 
 	}

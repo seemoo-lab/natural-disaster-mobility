@@ -173,11 +173,9 @@ public class GoToAirportActivityMovement extends MapBasedMovement implements Swi
 				}
 				if (SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) {
 					// We're done waiting, we can now go to the airport
-					System.out.println("We are done waiting -> we can now go to the airport");
-					
+
 					// Now we can calculate the PATH to the airport
-					System.out.println("Calculating PATH to go to the airport");
-					
+
 					// Selecting an airport location 
 					int firstRandom = this.getRandom(0,this.airport.size()-1);
 					// Setting nextLocation to airport location
@@ -216,19 +214,15 @@ public class GoToAirportActivityMovement extends MapBasedMovement implements Swi
 					// Creating a larger waiting time since we eitherway idle in the AT_AIRPORT_IDLE_MODE
 					this.waitingTime = generateHomeWaitTime() * 5; 
 					
-					System.out.println("Generated following PATH to the airport location: " + path);
-
 					return path;
 				}
 				else {
 					// We still need to idle since we haven't waited enough
-					System.out.println(" - GO_TO_AIRPORT_MODE mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case AT_AIRPORT_IDLE_MODE: {
 				// AT_AIRPORT_IDLE_MODE -> We're ideling at the airport until the end of the simulation
-				System.out.println("We arrived at the airport - AT_AIRPORT_IDLE_MODE mode");
 				if (SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) {
 					// We can continue if the actual SimClock time is greater than the old startedActivtyTime plus the current waiting time
 					// Reset parameteres in order to restart go to airport activity the next day
@@ -238,12 +232,10 @@ public class GoToAirportActivityMovement extends MapBasedMovement implements Swi
 					
 					this.startedActivityTime = SimClock.getTime();
 					this.waitingTime = generateHomeWaitTime();
-					System.out.println(" - AT_AIRPORT_IDLE_MODE mode - Should now be over - Switching to sleep activity now");
 				}
 				else {
 					// We still need to idle as it's to early to go to sleep again
-					System.out.println(" - AT_AIRPORT_IDLE_MODE mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 		 }
@@ -263,8 +255,7 @@ public class GoToAirportActivityMovement extends MapBasedMovement implements Swi
 	protected double generateHomeWaitTime() {
 		// We generate the waiting time we want to spent at home
 		double tmpWaitTime = this.getRandomDouble()*2000;
-		System.out.println("Generated a - generateHomeWaitTime() - GO TO AIRPORT - waiting time of: " + tmpWaitTime); 
-		return tmpWaitTime; 
+		return tmpWaitTime;
 	}
 	
 	@Override

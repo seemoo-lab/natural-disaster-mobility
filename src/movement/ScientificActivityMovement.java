@@ -302,11 +302,9 @@ public class ScientificActivityMovement extends MapBasedMovement  implements Swi
 					if (this.placesToVisit != this.placesCount) {
 						// Increasing the count of places we already visited for collecting evidences
 						this.placesCount++; 
-						System.out.println("We are done waiting -> we now go collecting evidences within the area");
-	
+
 						// Now we can calculate the PATH to the next main point location
-						System.out.println("Calculating PATH to go collecting scientific evidences");
-						
+
 						// Selecting a main point location for the collection of scientific evidences 
 						int firstRandom = this.getRandom(0,this.mainPoints.size()-1);
 						// Setting nextLocation to mainPoints location
@@ -342,15 +340,12 @@ public class ScientificActivityMovement extends MapBasedMovement  implements Swi
 						// Calculating a waiting time to be sure that we don't arrive "too early"
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateHomeWaitTime(); 
-						
-						System.out.println("Generated following PATH to scientific evidence collecting location: " + path);
-	
+
 						return path;
 					}
 					else {
 						// we visited enough places for evidence collection, now go home and sleep
 						this.mode = GO_HOME;
-						System.out.println("We visited enough places for evidence collection - Switching to GO_HOME mode"); 
 						// Calculating a waiting time to be sure that we don't arrive "too early"
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateHomeWaitTime(); 
@@ -359,8 +354,7 @@ public class ScientificActivityMovement extends MapBasedMovement  implements Swi
 				}
 				else {
 					// We still need to idle since we haven't waited enough
-					System.out.println(" - COLLECT_EVIDENCE mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case GO_HOME: {
@@ -369,8 +363,7 @@ public class ScientificActivityMovement extends MapBasedMovement  implements Swi
 					// Now we are sure that we waited long enough -> Go home and then sleep there 
 					
 					// Now we can calculate the PATH to go back home	
-					System.out.println("Calculating PATH to go back home");
-					
+
 					// Calculation of path back home
 					SimMap map = super.getMap();
 					if (map == null) {
@@ -406,14 +399,11 @@ public class ScientificActivityMovement extends MapBasedMovement  implements Swi
 					// Calculating a waiting time to be sure that we don't arrive "too early" at our home location!
 					this.waitingTime = generateHomeWaitTime();
 					this.startedActivityTime = SimClock.getTime(); 
-					System.out.println("Going home!");
-					System.out.println("Generated following PATH to HOME: " + path);
 					return path;
 				}
 				else {
 					// We still need to idle a bit
-					System.out.println(" - GO_HOME mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 			case IDLE_MODE: {
@@ -440,7 +430,6 @@ public class ScientificActivityMovement extends MapBasedMovement  implements Swi
 							// We're leaving the disaster area via the airport as of tomorrow
 							// We switch to the "go to airport" activity and then leave the disater area 
 							this.goToAirport = true; 
-							System.out.println("Going back to the airport and then heading home!");
 						}
 					}
 					else
@@ -457,12 +446,10 @@ public class ScientificActivityMovement extends MapBasedMovement  implements Swi
 					this.start = false; 
 
 					this.startedActivityTime = -1; 
-					System.out.println(" - IDLE_MODE mode - Should now be over - Switching to sleep activity now");
 				}
 				else {
 					// We still need to idle as it's to early to go to sleep again
-					System.out.println(" - IDLE_MODE mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 				if (this.nbrOfDays == this.dayCounter + 2) {
 					// We're leaving the disaster area via the airport as of tomorrow
@@ -470,7 +457,6 @@ public class ScientificActivityMovement extends MapBasedMovement  implements Swi
 					// Ensuring that all scientists leave on the last day of the disaster
 					this.placesCount = this.placesToVisit;
 					this.goToAirport = true;
-					System.out.println("Going back to the airport and then heading home!");
 				}
 			}
 			case VOLUNTEER: {
@@ -491,13 +477,12 @@ public class ScientificActivityMovement extends MapBasedMovement  implements Swi
 						this.placesCount++; 
 						
 						// Now we can calculate the PATH to go to one volunteering place
-						System.out.println("Calculating PATH to go volunteering");
-						
+
 						// Calculation of path to volunteering place
 						SimMap map = super.getMap();
 						if (map == null) {
 							System.out.println("Error while getting map!");
-								return null;
+							return null;
 						}
 						
 						// The node we want to go to
@@ -535,7 +520,7 @@ public class ScientificActivityMovement extends MapBasedMovement  implements Swi
 			
 							for (MapNode node : nodePath) {
 								path.addWaypoint(node.getLocation());
-								}
+							}
 						}
 						catch (Throwable t)
 						{
@@ -550,22 +535,18 @@ public class ScientificActivityMovement extends MapBasedMovement  implements Swi
 						this.startedActivityTime = SimClock.getTime();
 						this.waitingTime = generateVolunteeringWaitTime(); 
 						
-						System.out.println("Generated following PATH when going volunteering: " + path);
-						
 						return path;
 					}
 					else {
 						// We're done volunteering -> now go back home
 						this.mode = GO_HOME; 
-						System.out.println("Going back home");
-						this.waitingTime = generateHomeWaitTime(); 
+						this.waitingTime = generateHomeWaitTime();
 						this.startedActivityTime = SimClock.getTime(); 
 					}
 				}
 				else {
 					// We still need to idle when being a volunteer
-					System.out.println(" - VOLUNTEER mode - Active - Waiting"); 
-					break; 
+					break;
 				}
 			}
 		  }
@@ -585,15 +566,13 @@ public class ScientificActivityMovement extends MapBasedMovement  implements Swi
 	protected double generateHomeWaitTime() {
 		// We generate the waiting time we want to spent at home
 		double tmpWaitTime = this.getRandomDouble()*2000;
-		System.out.println("Generated a - generateHomeWaitTime() - SCIENTIFIC POPULATION - AT HOME - waiting time of: " + tmpWaitTime); 
-		return tmpWaitTime; 
+		return tmpWaitTime;
 	}
 	
 	protected double generateVolunteeringWaitTime() {
 		// We generate the waiting time we want to spent volunteering
 		double tmpWaitTime = this.getRandomDouble()*5000;
-		System.out.println("Generated a - generateVolunteeringWaitTime() - SCIENTIFIC POPULATION - waiting time of: " + tmpWaitTime); 
-		return tmpWaitTime; 
+		return tmpWaitTime;
 	}
 	
 	@Override

@@ -338,13 +338,12 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 				// Now we are sure that we waited long enough -> Going to OSOCC
 				
 				// Now we can calculate the PATH to OSOCC
-				System.out.println("Calculating PATH to OSOCC");
-				
+
 				// Calculation of path to OSOCC
 				SimMap map = super.getMap();
 				if (map == null) {
 					System.out.println("Error while getting map!");
-						return null;
+					return null;
 				}
 				
 				// Going to OSOCC
@@ -360,7 +359,7 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 	
 					for (MapNode node : nodePath) {
 						path.addWaypoint(node.getLocation());
-						}
+					}
 				}
 				catch (Throwable t)
 				{
@@ -375,14 +374,11 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 				// Calculating a waiting time to be sure that we don't arrive "too early" at the OSOCC location!
 				this.waitingTime = generateLongWaitTime();
 				this.startedActivityTime = SimClock.getTime(); 
-				System.out.println("Going to OSOCC!");
-				System.out.println("Generated following PATH to OSOCC: " + path);
 				return path;
 			}
 			else {
 				// We still need to idle a bit
-				System.out.println(" - GO_TO_OSOCC preparations mode - Active - Waiting"); 
-				break; 
+				break;
 			}
 		}
 		case SEARCH_AND_RESCUE: {
@@ -391,13 +387,12 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 				// We waited long enough, we are now going to our search and rescue mission
 
 				// Now we can calculate the PATH to our search and rescue mission
-				System.out.println("Calculating PATH to our search and rescue mission");
 
-				// Calculation of path to search and rescue mission location 
+				// Calculation of path to search and rescue mission location
 				SimMap map = super.getMap();
 				if (map == null) {
 					System.out.println("Error while getting map!");
-						return null;
+					return null;
 				}
 				
 				// The node we want to go to
@@ -422,8 +417,7 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 					// After visiting one last place we jump to the next mode and we're done with the search and rescue mission for today
 					this.mode = GO_HOME;
 					this.placesCount++;
-					System.out.println("Going back home soon, after visiting this one last place");
-					this.waitingTime = generateHomeWaitTime(); 
+					this.waitingTime = generateHomeWaitTime();
 					this.startedActivityTime = SimClock.getTime(); 
 				}
 				
@@ -470,8 +464,7 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 							secondNextNeighbor = neighbors.get(j);
 						}
 					}
-					System.out.println("Distance to closest neighor calculated to be: " + closestDistance);
-					
+
 					if (nextNeighbor == null) {
 						// Avoid the very rare case that we have so few neighbors that we would run in a null pointer exception otherwise
 						nextNeighbor = neighbors.get(0);
@@ -533,13 +526,11 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 				// Saving the actual activity time
 				this.startedActivityTime = SimClock.getTime();
 				
-				System.out.println("Generated following PATH when going on a search and rescue mission: " + path);
 				return path;
 			}
 			else {
 				// We still need to idle while in search and rescue mode
-				System.out.println(" - SEARCH_AND_RESCUE mode - Active - Waiting"); 
-				break; 
+				break;
 			}
 	}
 	case GO_HOME: {
@@ -548,8 +539,7 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 				// Now we are sure that we waited long enough -> Go home and then sleep there 
 				
 				// Now we can calculate the PATH to go back home	
-				System.out.println("Calculating PATH to go back home");
-				
+
 				// Calculation of path back home
 				SimMap map = super.getMap();
 				if (map == null) {
@@ -585,14 +575,11 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 				// Calculating a waiting time to be sure that we don't arrive "too early" at our home location!
 				this.waitingTime = generateHomeWaitTime();
 				this.startedActivityTime = SimClock.getTime(); 
-				System.out.println("Going home!");
-				System.out.println("Generated following PATH to HOME: " + path);
 				return path;
 			}
 			else {
 				// We still need to idle a bit
-				System.out.println(" - TO EARLY TO GO HOME - Stil active"); 
-				break; 
+				break;
 			}
 		}
 		case IDLE_MODE: {
@@ -613,7 +600,6 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 					// Ensuring that all scientists leave on the last day of the disaster
 					this.placesCount = this.placesToVisit;
 					this.goToAirport = true;
-					System.out.println("Going back to the airport and then heading home!");
 				}
 				
 				// Reset parameteres in order to restart search and rescue activity the next day
@@ -621,12 +607,10 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 				this.start = false; 
 
 				this.startedActivityTime = -1; 
-				System.out.println(" - IDLE_MODE mode - Should now be over - Switching to sleep activity now");
 			}
 			else {
 				// We still need to idle as it's to early to go to sleep again
-				System.out.println(" - IDLE_MODE mode - Active - Waiting"); 
-				break; 
+				break;
 			}
 		}
 	  }
@@ -646,15 +630,13 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 	protected double generateHomeWaitTime() {
 		// We generate the waiting time we want to spent at home
 		double tmpWaitTime = this.getRandomDouble()*6000;
-		System.out.println("Generated a - generateHomeWaitTime() - SEARCH AND RESCUE - waiting time of: " + tmpWaitTime); 
-		return tmpWaitTime; 
+		return tmpWaitTime;
 	}
 	
 	protected double generateLongWaitTime() {
 		// We generate a long waiting time 
 		double tmpWaitTime = this.getRandomDouble()*12000;
-		System.out.println("Generated a - generateLongWaitTime() - SEARCH AND RESCUE - waiting time of: " + tmpWaitTime); 
-		return tmpWaitTime; 
+		return tmpWaitTime;
 	}
 	
 	@Override
