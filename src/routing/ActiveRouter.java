@@ -8,6 +8,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Iterator;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import routing.util.EnergyModel;
@@ -49,6 +54,9 @@ public abstract class ActiveRouter extends MessageRouter {
 	private MessageTransferAcceptPolicy policy;
 	private EnergyModel energy;
 
+	private Map<Connection, List<Message>> transferQueues;
+	private Map<DTNHost, List<Message>> deliveryQueue;
+
 	/**
 	 * Constructor. Creates a new message router based on the settings in
 	 * the given Settings object.
@@ -84,6 +92,8 @@ public abstract class ActiveRouter extends MessageRouter {
 		super.init(host, mListeners);
 		this.sendingConnections = new ArrayList<Connection>(1);
 		this.lastTtlCheck = 0;
+		this.transferQueues = new HashMap<>();
+		this.deliveryQueue = new HashMap<>();
 	}
 
 	/**
@@ -106,18 +116,13 @@ public abstract class ActiveRouter extends MessageRouter {
 		}
 
 		DTNHost other = con.getOtherNode(getHost());
-		/* do a copy to avoid concurrent modification exceptions
-		 * (startTransfer may remove messages) */
-		ArrayList<Message> temp =
-			new ArrayList<Message>(this.getMessageCollection());
-		for (Message m : temp) {
-			if (other == m.getTo()) {
-				if (startTransfer(m, con) == RCV_OK) {
-					return true;
-				}
-			}
+
+		if (!deliveryQueue.containsKey(other)) {
+			List<Message> temp = getDeliverableMessagesFor(other);
+			deliveryQueue.put(other, temp);
 		}
-		return false;
+
+		return tryAllMessages(con, deliveryQueue.get(other)) != null;
 	}
 
 	@Override
@@ -311,6 +316,33 @@ public abstract class ActiveRouter extends MessageRouter {
 		makeRoomForMessage(size);
 	}
 
+	@Override
+	protected void addToMessages(Message m, boolean newMessage) {
+		super.addToMessages(m, newMessage);
+		for (List<Message> queue : transferQueues.values()) {
+			// FIXME can this cause a concurrent modification exception?
+			queue.add(m);
+			sortByQueueMode(queue);
+		}
+		List<Message> queue = deliveryQueue.get(m.getTo());
+		if (queue != null) {
+			queue.add(m);
+		}
+	}
+
+	@Override
+	protected Message removeFromMessages(String id) {
+		Message m = super.removeFromMessages(id);
+		for (List<Message> queue : transferQueues.values()) {
+			// FIXME can this cause a concurrent modification exception?
+			queue.remove(m);
+		}
+		List<Message> queue = deliveryQueue.get(m.getTo());
+		if (queue != null) {
+			queue.remove(m);
+		}
+		return m;
+	}
 
 	/**
 	 * Returns the oldest (by receive time) message in the message buffer
@@ -367,6 +399,16 @@ public abstract class ActiveRouter extends MessageRouter {
 		return forTuples;
 	}
 
+	protected List<Message> getDeliverableMessagesFor(DTNHost to) {
+		List<Message> deliverableMessages = new ArrayList<>();
+		for (Message m : getMessageCollection()) {
+			if (m.getTo() == to) {
+				deliverableMessages.add(m);
+			}
+		}
+		return deliverableMessages;
+	}
+
 	/**
 	 * Tries to send messages for the connections that are mentioned
 	 * in the Tuples in the order they are in the list until one of
@@ -402,7 +444,8 @@ public abstract class ActiveRouter extends MessageRouter {
 	  * transfer was started.
 	  */
 	protected Message tryAllMessages(Connection con, List<Message> messages) {
-		for (Message m : messages) {
+		for (Iterator<Message> iterator = messages.iterator(); iterator.hasNext(); ) {
+			Message m = iterator.next();
 			int retVal = startTransfer(m, con);
 			if (retVal == RCV_OK) {
 				return m;	// accepted a message, don't try others
@@ -410,6 +453,8 @@ public abstract class ActiveRouter extends MessageRouter {
 			else if (retVal > 0) {
 				return null; // should try later -> don't bother trying others
 			}
+			// Remove message from queue, i.e., don't try this one again the next time
+			iterator.remove();
 		}
 
 		return null; // no message was accepted
@@ -427,11 +472,9 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * accepted a message.
 	 */
 	protected Connection tryMessagesToConnections(List<Message> messages,
-			List<Connection> connections) {
-		for (int i=0, n=connections.size(); i<n; i++) {
-			Connection con = connections.get(i);
-			Message started = tryAllMessages(con, messages);
-			if (started != null) {
+			Collection<Connection> connections) {
+		for (Connection con : connections) {
+			if (tryAllMessages(con, messages) != null) {
 				return con;
 			}
 		}
@@ -442,22 +485,41 @@ public abstract class ActiveRouter extends MessageRouter {
 	/**
 	 * Tries to send all messages that this router is carrying to all
 	 * connections this node has. Messages are ordered using the
-	 * {@link MessageRouter#sortByQueueMode(List)}. See
-	 * {@link #tryMessagesToConnections(List, List)} for sending details.
+	 * {@link MessageRouter#sortByQueueMode(List)}.
 	 * @return The connections that started a transfer or null if no connection
 	 * accepted a message.
 	 */
 	protected Connection tryAllMessagesToAllConnections(){
-		List<Connection> connections = getConnections();
+		Set<Connection> connections = new HashSet<>(getConnections());
 		if (connections.size() == 0 || this.getNrofMessages() == 0) {
 			return null;
 		}
 
-		List<Message> messages =
-			new ArrayList<Message>(this.getMessageCollection());
-		this.sortByQueueMode(messages);
+		for (Iterator<Map.Entry<Connection, List<Message>>> iterator = transferQueues.entrySet().iterator(); iterator.hasNext(); /* next() in loop */) {
+			Map.Entry<Connection, List<Message>> entry = iterator.next();
+			Connection con = entry.getKey();
+			if (!connections.contains(con)) {
+				// Connection no longer active, remove
+				iterator.remove();
+			} else {
+				connections.remove(con);
+				if (tryAllMessages(con, entry.getValue()) != null) {
+					return con;
+				}
+			}
+		}
 
-		return tryMessagesToConnections(messages, connections);
+		for (Connection con : connections) {
+			List<Message> messages =
+					new ArrayList<Message>(this.getMessageCollection());
+			this.sortByQueueMode(messages);
+			transferQueues.put(con, messages);
+			if (tryAllMessages(con, messages) != null) {
+				return con;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -469,23 +531,46 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * was started
 	 */
 	protected Connection exchangeDeliverableMessages() {
-		List<Connection> connections = getConnections();
+		Set<Connection> connections = new HashSet<>(getConnections());
 
 		if (connections.size() == 0) {
 			return null;
 		}
 
-		@SuppressWarnings(value = "unchecked")
-		Tuple<Message, Connection> t =
-			tryMessagesForConnected(sortByQueueMode(getMessagesForConnected()));
-
-		if (t != null) {
-			return t.getValue(); // started transfer
+		for (Iterator<Map.Entry<DTNHost, List<Message>>> iterator = deliveryQueue.entrySet().iterator(); iterator.hasNext(); /* next() in loop */) {
+			Map.Entry<DTNHost, List<Message>> entry = iterator.next();
+			DTNHost other = entry.getKey();
+			Connection con = null;
+			for (Connection c : connections) {
+				if (c.getOtherNode(getHost()).equals(other)) {
+					con = c;
+					break;
+				}
+			}
+			if (con == null) {
+				// Connection no longer active, remove
+				iterator.remove();
+			} else {
+				connections.remove(con);
+				List<Message> messages = entry.getValue();
+				if (tryAllMessages(con, messages) != null) {
+					return con;
+				}
+				if (con.getOtherNode(getHost()).requestDeliverableMessages(con)) {
+					return con;
+				}
+			}
 		}
 
-		// didn't start transfer to any node -> ask messages from connected
 		for (Connection con : connections) {
-			if (con.getOtherNode(getHost()).requestDeliverableMessages(con)) {
+			DTNHost other = con.getOtherNode(getHost());
+			List<Message> messages = getDeliverableMessagesFor(other);
+			this.sortByQueueMode(messages);
+			deliveryQueue.put(other, messages);
+			if (tryAllMessages(con, messages) != null) {
+				return con;
+			}
+			if (other.requestDeliverableMessages(con)) {
 				return con;
 			}
 		}
