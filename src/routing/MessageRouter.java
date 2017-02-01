@@ -425,6 +425,15 @@ public abstract class MessageRouter {
 	}
 
 	/**
+	 * Returns true if router has currently any message in its incoming buffer,
+	 * i.e., whether the router is currently receiving some message.
+	 * @return true if incoming message buffer is not empty
+	 */
+	protected boolean hasIncomingMessage() {
+		return !this.incomingMessages.isEmpty();
+	}
+
+	/**
 	 * Adds a message to the message buffer and informs message listeners
 	 * about new message (if requested).
 	 * @param m The message to add

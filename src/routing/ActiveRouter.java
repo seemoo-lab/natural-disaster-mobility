@@ -602,24 +602,15 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * @return true if this router is transferring something
 	 */
 	public boolean isTransferring() {
-		if (this.sendingConnections.size() > 0) {
-			return true; // sending something
-		}
+		return isSending() || isReceiving();
+	}
 
-		List<Connection> connections = getConnections();
+	protected boolean isSending() {
+		return !sendingConnections.isEmpty();
+	}
 
-		if (connections.size() == 0) {
-			return false; // not connected
-		}
-
-		for (int i=0, n=connections.size(); i<n; i++) {
-			Connection con = connections.get(i);
-			if (!con.isReadyForTransfer()) {
-				return true;	// a connection isn't ready for new transfer
-			}
-		}
-
-		return false;
+	protected boolean isReceiving() {
+		return hasIncomingMessage();
 	}
 
 	/**
