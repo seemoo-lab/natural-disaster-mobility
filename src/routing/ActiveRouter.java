@@ -491,9 +491,6 @@ public abstract class ActiveRouter extends MessageRouter {
 	 */
 	protected Connection tryAllMessagesToAllConnections(){
 		Set<Connection> connections = new HashSet<>(getConnections());
-		if (connections.size() == 0 || this.getNrofMessages() == 0) {
-			return null;
-		}
 
 		for (Iterator<Map.Entry<Connection, List<Message>>> iterator = transferQueues.entrySet().iterator(); iterator.hasNext(); /* next() in loop */) {
 			Map.Entry<Connection, List<Message>> entry = iterator.next();
@@ -532,10 +529,6 @@ public abstract class ActiveRouter extends MessageRouter {
 	 */
 	protected Connection exchangeDeliverableMessages() {
 		Set<Connection> connections = new HashSet<>(getConnections());
-
-		if (connections.size() == 0) {
-			return null;
-		}
 
 		for (Iterator<Map.Entry<DTNHost, List<Message>>> iterator = deliveryQueue.entrySet().iterator(); iterator.hasNext(); /* next() in loop */) {
 			Map.Entry<DTNHost, List<Message>> entry = iterator.next();
