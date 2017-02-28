@@ -366,7 +366,7 @@ public abstract class ActiveRouter extends MessageRouter {
 			if (oldest == null ) {
 				oldest = m;
 			}
-			else if (oldest.getReceiveTime() > m.getReceiveTime()) {
+			else if (oldest.getTtl() > m.getTtl()) {
 				oldest = m;
 			}
 		}
