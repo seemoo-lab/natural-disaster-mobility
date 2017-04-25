@@ -519,7 +519,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 						Path path = new Path(generateSpeed());
 						try {
 							// From Neighbor -> To Food location 
-							MapNode fromNode = map.getNodeByCoord(lastLocation); // On first run neighbor location, as of seond run food location
+							MapNode fromNode = map.getNodeByCoord(lastLocation); // On first run neighbor location, as of second run food location
 							MapNode toNode = map.getNodeByCoord(nextLocation); // Food location
 							List<MapNode> nodePath = pathFinder.getShortestPath(fromNode, toNode);
 							
@@ -543,18 +543,36 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 						return path;
 					}
 					else {
-						// We've been to a food place now
-						if (reliefVolunteering) {
-							// Go to VOLUNTEER_FOR_CLEANING mode
-							this.mode = VOLUNTEER_FOR_CLEANING;
+						// WORKAROUND - make non-injured either look for food or chose between volunteering & marching in streets
+						int getRand = this.getRandom(0,this.mainPoints.size()-1);
+						if (getRand % 2 == 0)
+						{
+							// We chose to continue to look for food (50 % chance) 
+							// Set beenToFoodPlace to false in order to make another round
+							this.beenToFoodPlace = false; 
+							// Go to MOVE_AROUND_FIND_FOOD_WATER mode
+							// We've been to a food place - Switching to MOVE_AROUND_FIND_FOOD_WATER mode - Next round
+							this.mode = MOVE_AROUND_FIND_FOOD_WATER;
 						}
-						else {
-							// Go to MARCHING_IN_STREETS mode
-							this.mode = MARCHING_IN_STREETS;
+						else
+						{
+							// We chose between volunteering & marching in streets
+							if (reliefVolunteering) {
+								// Go to VOLUNTEER_FOR_CLEANING mode
+								// We've been to a food place - Switching to VOLUNTEER_FOR_CLEANING mode
+								this.mode = VOLUNTEER_FOR_CLEANING;
+							}
+							else {
+								// Go to MARCHING_IN_STREETS mode
+								// We've been to a food place - Switching to MARCHING_IN_STREETS mode
+								this.mode = MARCHING_IN_STREETS;
+							}
 						}
-						// Calculating a waiting time to be sure that we don't arrive "too early"
+						
+						// Calculating a waiting time to be sure that we don't arrive or leave "too early"
 						this.startedActivityTime = SimClock.getTime();
-						this.waitingTime = generateHomeWaitTime();
+						// Add increased waiting time for staying at the food place 
+						this.waitingTime = generateHomeWaitTime() * 3;
 						break; 
 					}
 				}

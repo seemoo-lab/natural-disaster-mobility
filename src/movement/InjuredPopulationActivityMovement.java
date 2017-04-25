@@ -363,7 +363,15 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 					// We are sure that we arrived at the hospital, no preparing for leaving later on 
 					// Create a larger waiting time since we assume we stay at the hospital for at least some time
 					this.waitingTime = generateHospitalWaitTime(); 
-					// Switching to GO_HOME mode
+
+					// WORKAROUND: If patient is healed after staying at the hosptial he should then stay at home to continue healing
+					// As a quick workaround we thus switch to "TO_ILL_TO_GO_TO_HOSPITAL" mode  
+					if ((this.getRandomDouble() * this.tooInjuredForHospitalProb) <= 0.15) {
+						// We're healed after staying at the hospital - now go home and stay home for the rest of this simulation
+						this.unableToGoToHospital = true; 
+					}
+					
+					// Switching to GO_HOME mode 
 					this.mode = GO_HOME;
 					this.startedActivityTime = SimClock.getTime();
 				}
