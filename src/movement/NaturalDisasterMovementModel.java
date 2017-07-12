@@ -90,7 +90,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 	private int mode;
 
 	/** The role of the individual that this model is run on */
-	private String role;
+	private final String role;
 
 	/** Number of days */
 	private int nbrOfDays;
@@ -233,7 +233,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 						// If we end up here the simulation is finished -> we idle forever
 						break;
 					}
-					if (role == SCIENTIST_ROLE) {
+					if (role.equals(SCIENTIST_ROLE)) {
 						// Switching to the next movement model
 						if (!scienceMM.getGoToAirport()) {
 							// we remain in the science movement model
@@ -254,7 +254,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 							goToAirportMM.Activate();
 						}
 					}
-					if (role == INJURED_ROLE) {
+					if (role.equals(INJURED_ROLE)) {
 						// Switching to the next movement model
 						setCurrentMovementModel(injuredMM);
 						// set mode to accurate model
@@ -262,7 +262,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 						// Activate the correct movement model again and update its dayCounter
 						injuredMM.Activate(this.dayCounter);
 					}
-					if (role == HEALTHY_ROLE) {
+					if (role.equals(HEALTHY_ROLE)) {
 						// Switching to the next movement model
 						setCurrentMovementModel(nonInjuredMM);
 						// set mode to accurate model
@@ -270,7 +270,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 						// Activate the correct movement model again and update its dayCounter
 						nonInjuredMM.Activate(this.dayCounter);
 					}
-					if (role == SEARCH_RESCUE_ROLE) {
+					if (role.equals(SEARCH_RESCUE_ROLE)) {
 						// Switching to the next movement model
 						if (!searchRescueMM.getGoToAirport()) {
 							// we remain in the search and rescue movement model
@@ -291,7 +291,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 							goToAirportMM.Activate();
 						}
 					}
-					if (role == GOVERNMENT_ROLE) {
+					if (role.equals(GOVERNMENT_ROLE)) {
 						// Switching to the next movement model
 						setCurrentMovementModel(officialsMM);
 						// set mode to accurate model
@@ -299,7 +299,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 						// Activate the correct movement model again and update its dayCounter
 						officialsMM.Activate(this.dayCounter);
 					}
-					if (role == UN_ROLE) {
+					if (role.equals(UN_ROLE)) {
 						// Switching to the next movement model
 						setCurrentMovementModel(officialsMM);
 						// set mode to accurate model
@@ -307,7 +307,7 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 						// Activate the correct movement model again and update its dayCounter
 						officialsMM.Activate(this.dayCounter);
 					}
-					if (role == DRO_ROLE) {
+					if (role.equals(DRO_ROLE)) {
 						// Switching to the next movement model
 						setCurrentMovementModel(disasterReliefMM);
 						// set mode to accurate model
@@ -321,42 +321,29 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 			case ARRIVAL_MODE: {
 				if (airportArrivalMM.isReady()) {
 					// If true we are done with the arrival at airport part and want to become active in the disaster area
-					// Set activity according to group ID
-					if (role == SCIENTIST_ROLE) {
-						// throw error since SCIENTISTS should'nt be in arrival mode at any time
-					}
-					if (role == INJURED_ROLE) {
-						// throw error since injured should'nt be in arrival mode at any time
-					}
-					if (role == HEALTHY_ROLE) {
-						// throw error since non injured should'nt be in arrival mode at any time
-					}
-					if (role == SEARCH_RESCUE_ROLE) {
+					if (role.equals(SEARCH_RESCUE_ROLE)) {
 						// Mandatory to set initial location in order to avoid null pointer exceptions since this activity starts after the arrival at airport activity
 						searchRescueMM.setInitialLocation(airportArrivalMM.getLastLocation().clone());
 						setCurrentMovementModel(searchRescueMM);
 						mode = SEARCH_RESCUE_MODE;
 						// Activate the correct movement model again and update its dayCounter
 						searchRescueMM.Activate(this.dayCounter);
-					}
-					if (role == GOVERNMENT_ROLE) {
-						// throw error since injured should'nt be in arrival mode at any time
-					}
-					if (role == UN_ROLE) {
+					} else if (role.equals(UN_ROLE)) {
 						// Mandatory to set initial location in order to avoid that UN group is mispositioned on the map since activity starts at the city center when location is not explicitly set! (fallback mode)
 						officialsMM.setInitialLocation(airportArrivalMM.getLastLocation().clone());
 						setCurrentMovementModel(officialsMM);
 						mode = OFFICIAL_MODE;
 						// Activate the correct movement model again and update its dayCounter
 						officialsMM.Activate(this.dayCounter);
-					}
-					if (role == DRO_ROLE) {
+					} else if (role.equals(DRO_ROLE)) {
 						// Mandatory to set initial location in order to avoid null pointer exceptions since this activity starts after the arrival at airport activity
 						disasterReliefMM.setInitialLocation(airportArrivalMM.getLastLocation().clone());
 						setCurrentMovementModel(disasterReliefMM);
 						mode = DISASTER_RELIEF_MODE;
 						// Activate the correct movement model again and update its dayCounter
 						disasterReliefMM.Activate(this.dayCounter);
+					} else {
+						throw new SimError("Should not be in this mode");
 					}
 				}
 				break;
@@ -364,30 +351,13 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 			case DISASTER_RELIEF_MODE: {
 				if (disasterReliefMM.isReady()) {
 					// If true we are done with the disaster relief activity for today and want to go home / to sleep (generally speaking)
-					// Set activity according to group ID
-					if (role == SCIENTIST_ROLE) {
-						// throw error since we should'nt be in disaster relief mode at any time
-					}
-					if (role == INJURED_ROLE) {
-						// throw error since we should'nt be in disaster relief mode at any time
-					}
-					if (role == HEALTHY_ROLE) {
-						// throw error since we should'nt be in disaster relief mode at any time
-					}
-					if (role == SEARCH_RESCUE_ROLE) {
-						// throw error since we should'nt be in disaster relief mode at any time
-					}
-					if (role == GOVERNMENT_ROLE) {
-						// throw error since we should'nt be in disaster relief mode at any time
-					}
-					if (role == UN_ROLE) {
-						// throw error since we should'nt be in disaster relief mode at any time
-					}
-					if (role == DRO_ROLE) {
+					if (role.equals(DRO_ROLE)) {
 						// Day is over, going home to sleep -> Activating sleep activity
 						setCurrentMovementModel(goSleepMM);
 						mode = SLEEP_MODE;
 						goSleepMM.Activate(this.dayCounter);
+					} else {
+						throw new SimError("Should not be in this mode");
 					}
 				}
 				break;
@@ -396,29 +366,13 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 				if (scienceMM.isReady()) {
 					// If true we are done with the scientific part and want to go home / to sleep (generally speaking)
 					// Set activity according to group ID
-					if (role == SCIENTIST_ROLE) {
+					if (role.equals(SCIENTIST_ROLE)) {
 						// Day is over, going home to sleep -> Activating sleep activity
 						setCurrentMovementModel(goSleepMM);
 						mode = SLEEP_MODE;
 						goSleepMM.Activate(this.dayCounter);
-					}
-					if (role == INJURED_ROLE) {
-						// throw error since we should'nt be in scientific mode at any time
-					}
-					if (role == HEALTHY_ROLE) {
-						// throw error since we should'nt be in scientific mode at any time
-					}
-					if (role == SEARCH_RESCUE_ROLE) {
-						// throw error since we should'nt be in scientific mode at any time
-					}
-					if (role == GOVERNMENT_ROLE) {
-						// throw error since we should'nt be in scientific mode at any time
-					}
-					if (role == UN_ROLE) {
-						// throw error since we should'nt be in scientific mode at any time
-					}
-					if (role == DRO_ROLE) {
-						// throw error since we should'nt be in scientific mode at any time
+					} else {
+						throw new SimError("Should not be in this mode");
 					}
 				}
 				break;
@@ -426,61 +380,24 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 			case GO_AIRPORT_MODE: {
 				if (goToAirportMM.isReady()) {
 					// If true we are done with disaster relief and already at the airport -> so we solely idle here
-					// Set activity according to group ID
-					if (role == SCIENTIST_ROLE) {
-						//System.out.println("Simulation is over for this scientist node - Idle mode ON");
-					}
-					if (role == INJURED_ROLE) {
-						// Throw an error since we shouldn't use this mode
-					}
-					if (role == HEALTHY_ROLE) {
-						// Throw an error since we shouldn't use this mode
-					}
-					if (role == SEARCH_RESCUE_ROLE) {
-						//System.out.println("Simulation is over for this search and rescue node - Idle mode ON");
-					}
-					if (role == GOVERNMENT_ROLE) {
-						//System.out.println("Simulation is over for this officials node - Idle mode ON");
-					}
-					if (role == UN_ROLE) {
-						//System.out.println("Simulation is over for this officials node - Idle mode ON");
-					}
-					if (role == DRO_ROLE) {
-						//System.out.println("Simulation is over for this disaster relief organization member node - Idle mode ON");
-					}
 				}
 				break;
 			}
 			case OFFICIAL_MODE: {
 				if (officialsMM.isReady()) {
 					// If true we are done with the officials activity and want to go home / to sleep (generally speaking)
-					// Set activity according to group ID
-					if (role == SCIENTIST_ROLE) {
-						// throw error since we should'nt be in officials mode at any time
-					}
-					if (role == INJURED_ROLE) {
-						// throw error since we should'nt be in officials mode at any time
-					}
-					if (role == HEALTHY_ROLE) {
-						// throw error since we should'nt be in officials mode at any time
-					}
-					if (role == SEARCH_RESCUE_ROLE) {
-						// throw error since we should'nt be in officials mode at any time
-					}
-					if (role == GOVERNMENT_ROLE) {
+					if (role.equals(GOVERNMENT_ROLE)) {
 						// Day is over, going home to sleep -> Activating sleep activity
 						setCurrentMovementModel(goSleepMM);
 						mode = SLEEP_MODE;
 						goSleepMM.Activate(this.dayCounter);
-					}
-					if (role == UN_ROLE) {
+					} else if (role.equals(UN_ROLE)) {
 						// Day is over, going home to sleep -> Activating sleep activity
 						setCurrentMovementModel(goSleepMM);
 						mode = SLEEP_MODE;
 						goSleepMM.Activate(this.dayCounter);
-					}
-					if (role == DRO_ROLE) {
-						// throw error since we should'nt be in officials mode at any time
+					} else {
+						throw new SimError("Should not be in this mode");
 					}
 				}
 				break;
@@ -488,30 +405,13 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 			case SEARCH_RESCUE_MODE: {
 				if (searchRescueMM.isReady()) {
 					// If true we are done with the search and rescue activity and want to go home / to sleep (generally speaking)
-					// Set activity according to group ID
-					if (role == SCIENTIST_ROLE) {
-						// throw error since we should'nt be in searchRescue mode at any time
-					}
-					if (role == INJURED_ROLE) {
-						// throw error since we should'nt be in searchRescue mode at any time
-					}
-					if (role == HEALTHY_ROLE) {
-						// throw error since we should'nt be in searchRescue mode at any time
-					}
-					if (role == SEARCH_RESCUE_ROLE) {
+					if (role.equals(SEARCH_RESCUE_ROLE)) {
 						// Day is over, going home to sleep -> Activating sleep activity
 						setCurrentMovementModel(goSleepMM);
 						mode = SLEEP_MODE;
 						goSleepMM.Activate(this.dayCounter);
-					}
-					if (role == GOVERNMENT_ROLE) {
-						// throw error since we should'nt be in searchRescue mode at any time
-					}
-					if (role == UN_ROLE) {
-						// throw error since we should'nt be in searchRescue mode at any time
-					}
-					if (role == DRO_ROLE) {
-						// throw error since we should'nt be in searchRescue mode at any time
+					} else {
+						throw new SimError("Should not be in this mode");
 					}
 				}
 				break;
@@ -519,30 +419,13 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 			case INJURED_MODE: {
 				if (injuredMM.isReady()) {
 					// If true we are done with our daily activity and want to go home / to sleep (generally speaking)
-					// Set activity according to group ID
-					if (role == SCIENTIST_ROLE) {
-						// throw error since we should'nt be in injured mode at any time
-					}
-					if (role == INJURED_ROLE) {
+					if (role.equals(INJURED_ROLE)) {
 						// Day is over, going home to sleep -> Activating sleep activity
 						setCurrentMovementModel(goSleepMM);
 						mode = SLEEP_MODE;
 						goSleepMM.Activate(this.dayCounter);
-					}
-					if (role == HEALTHY_ROLE) {
-						// throw error since we should'nt be in injured mode at any time
-					}
-					if (role == SEARCH_RESCUE_ROLE) {
-						// throw error since we should'nt be in injured mode at any time
-					}
-					if (role == GOVERNMENT_ROLE) {
-						// throw error since we should'nt be in injured mode at any time
-					}
-					if (role == UN_ROLE) {
-						// throw error since we should'nt be in injured mode at any time
-					}
-					if (role == DRO_ROLE) {
-						// throw error since we should'nt be in injured mode at any time
+					} else {
+						throw new SimError("Should not be in this mode");
 					}
 				}
 				break;
@@ -550,30 +433,13 @@ public class NaturalDisasterMovementModel extends ExtendedMovementModel {
 			case HEALTHY_MODE: {
 				if (nonInjuredMM.isReady()) {
 					// If true we are done with our daily activity and want to go home / to sleep (generally speaking)
-					// Set activity according to group ID
-					if (role == SCIENTIST_ROLE) {
-						// throw error since we should'nt be in non-injured mode at any time
-					}
-					if (role == INJURED_ROLE) {
-						// throw error since we should'nt be in non-injured mode at any time
-					}
-					if (role == HEALTHY_ROLE) {
+					if (role.equals(HEALTHY_ROLE)) {
 						// Day is over, going home to sleep -> Activating sleep activity
 						setCurrentMovementModel(goSleepMM);
 						mode = SLEEP_MODE;
 						goSleepMM.Activate(this.dayCounter);
-					}
-					if (role == SEARCH_RESCUE_ROLE) {
-						// throw error since we should'nt be in non-injured mode at any time
-					}
-					if (role == GOVERNMENT_ROLE) {
-						// throw error since we should'nt be in non-injured mode at any time
-					}
-					if (role == UN_ROLE) {
-						// throw error since we should'nt be in non-injured mode at any time
-					}
-					if (role == DRO_ROLE) {
-						// throw error since we should'nt be in non-injured mode at any time
+					} else {
+						throw new SimError("Should not be in this mode");
 					}
 				}
 				break;
