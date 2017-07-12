@@ -2,10 +2,13 @@
  * Copyright 2015 Tom Schons - TU Darmstadt, Germany
  * Released under GPLv3. See LICENSE.txt for details.
  */
-package movement;
+package movement.naturaldisaster;
 
 import java.util.List;
 
+import movement.MapBasedMovement;
+import movement.Path;
+import movement.SwitchableMovement;
 import movement.map.DijkstraPathFinder;
 import movement.map.MapNode;
 import core.Coord;
@@ -14,10 +17,8 @@ import core.Settings;
 import input.WKTReader;
 import java.io.File;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ArrayList;
 import movement.map.SimMap;
-import java.util.Random;
 import core.SimClock;
 
 /**
@@ -31,10 +32,9 @@ import core.SimClock;
  *
  * @author Tom Schons
  */
-public class SearchAndRescueActivityMovement extends MapBasedMovement  implements SwitchableMovement {
+public class SearchAndRescueActivityMovement extends MapBasedMovement implements SwitchableMovement {
 
 	// Constants for importing settings from default settings file
-	public static final String DAY_LENGTH = "dayLength";
 	public static final String NUMBER_OF_DAYS = "nbrOfDays";
 	// Number of places to be visited
 	public static final String PLACES_TO_VISIT = "placesToVisit"; 
@@ -46,7 +46,7 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 	public static final String AIRPORT_LOCATIONS_FILE_SETTING = "airportLocationsFile";
 	
 	// Length of the day in seconds
-	private double dayLength; 
+	private static final int SECONDS_IN_A_DAY = 24 * 60 * 60;
 	// Number of days
 	private int nbrOfDays; 
 	// Number of places we visit
@@ -123,13 +123,6 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 		pathFinder = new DijkstraPathFinder(null);
 		
 		// Loading settings via default settings file
-		if (settings.contains(DAY_LENGTH)) {
-			this.dayLength = settings.getDouble(DAY_LENGTH);
-		}
-		else {
-			System.out.println("You didn't specify a value for the day length!");
-			System.out.println("dayLength: " + this.dayLength); 
-		} 
 		if (settings.contains(NUMBER_OF_DAYS)) {
 			this.nbrOfDays = settings.getInt(NUMBER_OF_DAYS);
 		}
@@ -284,8 +277,7 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 		this.pathFinder = prototype.pathFinder;
 		
 		// Loading settings via default settings file
-		this.dayLength = prototype.getDayLength();
-		this.nbrOfDays = prototype.getNbrOfDays(); 
+		this.nbrOfDays = prototype.getNbrOfDays();
 		this.placesToVisit = prototype.getPlacesToVisit(); 
 		this.mainPoints = prototype.getMainPoints(); 
 		this.osocc = prototype.getOsocc(); 
@@ -584,9 +576,9 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 		}
 		case IDLE_MODE: {
 			// IDLE_MODE -> Before switching to the sleep activity 
-			if ((SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) && (SimClock.getTime() > (this.dayLength*(this.dayCounter+1)))) {
+			if ((SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) && (SimClock.getTime() > (this.SECONDS_IN_A_DAY *(this.dayCounter+1)))) {
 				// We can continue if a) the actual SimClock time is greater than the old startedActivtyTime plus the current waiting time and
-				// b) the actual SimClock time is greater than the (dayLength) times (the dayCounter +1), which means we successfully simulated one more day
+				// b) the actual SimClock time is greater than the (SECONDS_IN_A_DAY) times (the dayCounter +1), which means we successfully simulated one more day
 				// we are done ideling -> now we can safely switch to sleep activity 
 				
 				// Reset places count to 0 so that we can restart the activity tomorrow 
@@ -685,11 +677,7 @@ public class SearchAndRescueActivityMovement extends MapBasedMovement  implement
 	private double getRandomDouble() {
 		return rng.nextDouble();
 	}
-	
-	public double getDayLength() {
-		return this.dayLength; 
-	}
-	
+
 	public int getNbrOfDays() {
 		return this.nbrOfDays; 
 	}

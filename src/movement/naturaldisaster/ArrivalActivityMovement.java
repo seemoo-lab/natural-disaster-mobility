@@ -2,10 +2,11 @@
  * Copyright 2015 Tom Schons - TU Darmstadt, Germany
  * Released under GPLv3. See LICENSE.txt for details.
  */
-package movement;
+package movement.naturaldisaster;
 
-import java.util.*;
-
+import movement.MapBasedMovement;
+import movement.Path;
+import movement.SwitchableMovement;
 import movement.map.DijkstraPathFinder;
 import movement.map.MapNode;
 import core.Coord;
@@ -16,7 +17,6 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import movement.map.SimMap;
-import java.util.Random;
 import core.SimClock;
 
 /**
@@ -506,11 +506,7 @@ public class ArrivalActivityMovement extends MapBasedMovement implements Switcha
 	public Coord getLastLocation() {
 		return lastLocation.clone();
 	}
-	
-	public Coord getSomeAirportLocation() {
-		return someAirportLocation.clone();
-	}
-	
+
 	public List<Coord> getAirport()
 	{
 		return this.airport; 

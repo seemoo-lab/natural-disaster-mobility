@@ -2,10 +2,13 @@
  * Copyright 2015 Tom Schons - TU Darmstadt, Germany
  * Released under GPLv3. See LICENSE.txt for details.
  */
-package movement;
+package movement.naturaldisaster;
 
 import java.util.List;
 
+import movement.MapBasedMovement;
+import movement.Path;
+import movement.SwitchableMovement;
 import movement.map.DijkstraPathFinder;
 import movement.map.MapNode;
 import core.Coord;
@@ -14,63 +17,69 @@ import core.Settings;
 import input.WKTReader;
 import java.io.File;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.ArrayList;
+
 import movement.map.SimMap;
-import java.util.Random;
 import core.SimClock;
 
 /**
- * The DisasterReliefActivityMovement class represents the movement submodel of disaster relief units in a disaster area
+ * The OfficialsActivityMovement class represents the movement submodel of government or UN officials in a disaster zone
  * 
- * Disaster relief units usually arrive via the airport (not included here, but in the "arrival at airport" activitiy)
- * As of the first day disaster relief organizations meet on a daily basis with UN and government officials (at the city hall or OSOCC)
- * Disaster relief organizations distribute food and water to the population and help to free roads from debris  
- * In the evening to go back home to their sleeping spot (usually the base camp)
- *
+ * Officials go to the OSOCC, the Town Hall and the base camp on a regular basis for meeting with different parties,
+ * such as for example disaster relief organizations and for organizing the disaster relief effords in the aftermath of a natural disaster.
+ * Officials go to reconnaissance missions in order to enable the provisioning of help to be best allocated and infrastructural damage and reparation needs to be assessed.
+ * Food and water distribution is (partially) organized by the officials in collaboration with disaster relief organizations.
+ * Officials usually also coordinate burials outside the city center in order to deal with the problem of overwhelmed morgues.
+ * 
  * @author Tom Schons
  */
-public class DisasterReliefActivityMovement extends MapBasedMovement implements SwitchableMovement {
-	
+public class OfficialsActivityMovement extends MapBasedMovement implements SwitchableMovement {
+
 	// Constants for importing settings from default settings file
-	public static final String DAY_LENGTH = "dayLength";
 	public static final String NUMBER_OF_DAYS = "nbrOfDays";
 	// Number of places to be visited
 	public static final String PLACES_TO_VISIT = "placesToVisit"; 
 	
 	// Location files loaded via external default settings file (if provided)
+	public static final String HOME_LOCATION_FILE_SETTING = "homeLocationFile";
 	public static final String MAIN_POINT_LOCATION_FILE_SETTING = "mainPointLocationFile";
 	public static final String OSOCC_LOCATIONS_FILE_SETTING = "osoccLocationsFile";
 	public static final String BASE_CAMP_LOCATIONS_FILE_SETTING = "baseCampLocationsFile";
 	public static final String TOWN_HALL_LOCATIONS_FILE_SETTING = "townHallLocationsFile";
 	public static final String FOOD_LOCATION_FILE_SETTINGS = "foodLocationFile";
+	public static final String BURIALS_LOCATION_FILE_SETTINGS = "burialsLocationFile";
 	public static final String AIRPORT_LOCATIONS_FILE_SETTING = "airportLocationsFile";
 	
 	// Length of the day in seconds
-	private double dayLength; 
+	private static final int SECONDS_IN_A_DAY = 24 * 60 * 60;
 	// Number of days
 	private int nbrOfDays; 
-	// Number of places we visit
+	// Number of volunteering places we visit
 	private double placesToVisit; 
-	// Places actually visited so far
-	private double placesCount = 0;
+	// Volunteering or patrolling places actually visited so far
+	private double placesCount = 0; 
 	
 	// File names of the specific location files
+	private String homeLocationFile = null;
 	private String mainPointLocationFile = null;
 	private String osoccLocationsFile = null;
 	private String baseCampLocationsFile = null;
 	private String townHallLocationsFile = null;
 	private String foodLocationFile = null; 
+	private String burialsLocationFile = null; 
 	private String airportLocationsFile = null;
 	
 	// Lists of coordinates for specific location files
+	private List<Coord> homes = null; 
 	private List<Coord> mainPoints = null; 
 	private List<Coord> osocc = null;
 	private List<Coord> baseCamp = null;
 	private List<Coord> townHall = null;
 	private List<Coord> foodWater = null; 
+	private List<Coord> burials = null; 
 	private List<Coord> airport = null;
 	
+	// Holds the nodes a chosen home location - Randomly chosen in order to hold account to invariances in the real world
+	private Coord someHomeLocation;
 	// Holds the nodes currently chosen point location - can be any place he want's to go to on the map
 	private Coord somePointLocation;
 	// Holds the nodes chosen OSOCC location
@@ -81,11 +90,15 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 	private Coord someBaseCampLocation;
 	// Holds the nodes currently chosen food location
 	private Coord someFoodLocation; 
+	// Holds the nodes chosen location of a burial site 
+	private Coord someBurialLocation; 
 	// Holds the nodes chosen airport location
 	private Coord someAirportLocation;
 	
 	// The mode in which we are operating this activity right now
 	private int mode; 
+	// Saving the operational mode for actions after day 0 
+	private int operationalMode = 0; 
 	
 	// Modes of operation
 	// GO_TO_OSOCC -> Going to the OSOCC -> organizing disaster relief 
@@ -93,14 +106,18 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 	// GO_TO_TOWN_HALL -> Going to the town hall -> Meeting of government and UN officials, on a regular basis
 	// In this case "town hall" is just a representatively chosen word for any meeting point such as town or city hall or the police headquater (this always varies with the specific scenario conditions!) 
 	private static final int GO_TO_TOWN_HALL = 2;
+	// GO_TO_BASE_CAMP -> Going to the base camp -> meeting with disaster relief organizations
+	private static final int GO_TO_BASE_CAMP = 3;
+	// RECONNAISSANCE_MISSIONS -> Going on reconnaissance missions -> Exploring the situation in the post disaster area
+	private static final int RECONNAISSANCE_MISSIONS = 4;
 	// FOOD_WATER_DISTRIBUTION -> We go to food and water distribution locations (for helping with the distribution)
-	private static final int FOOD_WATER_DISTRIBUTION = 3;
-	// MARCHING_IN_STREETS -> Some disaster relief organizations are marching through the streets, helping locals where they can (providing food, clearing rubble etc.)
-	private static final int MARCHING_IN_STREETS = 4; 
+	private static final int FOOD_WATER_DISTRIBUTION = 5;
+	// ORGANIZE_BURIAL -> Organize burials outsite the city center
+	private static final int ORGANIZE_BURIAL = 6; 
 	// GO_HOME -> Go home after being around the city all day
-	private static final int GO_HOME = 5; 
+	private static final int GO_HOME = 7; 
 	// IDLE_MODE -> Before switching to the next activity 
-	private static final int IDLE_MODE = 6;
+	private static final int IDLE_MODE = 8;
 	
 	// DijkstraPathFinder used for calculating our path 
 	private DijkstraPathFinder pathFinder;
@@ -108,7 +125,7 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 	// The exact timeslot when we (re-)started this activtiy 
 	private double startedActivityTime;
 	
-	// LastLocation holds the last location a node visited (will always be updated)
+	// LastLocation holds the last location a node visited (is initially set to some random home location after finishing the constructor, since many officials are spread around the area - will always be updated)
 	private Coord lastLocation;
 	// NextLocation holds the next location a node will visit (will always be updated)
 	private Coord nextLocation;
@@ -126,21 +143,14 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 	private double waitingTime = 0; 
 	
 	/**
-	 * DisasterReliefActivityMovement constructor
+	 * Officials activity constructor
 	 * @param settings
 	 */
-	public DisasterReliefActivityMovement(Settings settings) {
+	public OfficialsActivityMovement(Settings settings) {
 		super(settings);
 		pathFinder = new DijkstraPathFinder(null);
 		
 		// Loading settings via default settings file
-		if (settings.contains(DAY_LENGTH)) {
-			this.dayLength = settings.getDouble(DAY_LENGTH);
-		}
-		else {
-			System.out.println("You didn't specify a value for the day length!");
-			System.out.println("dayLength: " + this.dayLength); 
-		} 
 		if (settings.contains(NUMBER_OF_DAYS)) {
 			this.nbrOfDays = settings.getInt(NUMBER_OF_DAYS);
 		}
@@ -158,6 +168,13 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 		
 		// Loading location files as specified via default settings file (has to be done via try-catch)
 		try {	
+			if (settings.contains(HOME_LOCATION_FILE_SETTING)) {
+				this.homeLocationFile = settings.getSetting(HOME_LOCATION_FILE_SETTING);
+			}
+			else {
+				System.out.println("You didn't specify a value for the home location file!");
+				System.out.println("homeLocationFile: " + this.homeLocationFile); 
+			}
 			if (settings.contains(MAIN_POINT_LOCATION_FILE_SETTING)) {
 				this.mainPointLocationFile = settings.getSetting(MAIN_POINT_LOCATION_FILE_SETTING);
 			}
@@ -193,6 +210,13 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 				System.out.println("You didn't specify a value for the food and water distribution locations file!");
 				System.out.println("foodLocationFile: " + this.foodLocationFile); 
 			}
+			if (settings.contains(BURIALS_LOCATION_FILE_SETTINGS)) {
+				this.burialsLocationFile = settings.getSetting(BURIALS_LOCATION_FILE_SETTINGS);
+			}
+			else {
+				System.out.println("You didn't specify a value for the burials location file!");
+				System.out.println("burialsLocationFile: " + this.burialsLocationFile); 
+			}
 			if (settings.contains(AIRPORT_LOCATIONS_FILE_SETTING)) {
 				this.airportLocationsFile = settings.getSetting(AIRPORT_LOCATIONS_FILE_SETTING);
 			}
@@ -210,6 +234,26 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 		// Reading specific locations from the map files provided via default settings file
 		SimMap map = getMap();
 		Coord offset = map.getOffset();
+		
+		// Read home locations into local array
+		this.homes = new LinkedList<Coord>();
+		try {
+		List<Coord> locationsRead1 = (new WKTReader()).readPoints(new File(homeLocationFile));
+		for (Coord coord1 : locationsRead1) {
+			// Mirroring all points if map data is mirrored
+			if (map.isMirrored()) {
+				coord1.setLocation(coord1.getX(), -coord1.getY());
+			}
+			coord1.translate(offset.getX(), offset.getY());
+			this.homes.add(coord1);
+		}
+		// Chose a random position for a home location
+		int firstRandom = this.getRandom(0,this.homes.size()-1);
+		this.someHomeLocation = this.homes.get(firstRandom).clone();
+		} catch (Throwable t) {
+			System.out.println("Reading the home location file permanently failed");
+			System.out.println("someHomeLocation " + this.someHomeLocation);
+		}
 		
 		// Read main points locations into local array 
 		this.mainPoints = new LinkedList<Coord>();
@@ -311,6 +355,26 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 			System.out.println("someFoodLocation " + this.someFoodLocation);
 		}
 		
+		// Read burials locations into local array 
+		this.burials = new LinkedList<Coord>();
+		try {
+		List<Coord> locationsRead7 = (new WKTReader()).readPoints(new File(burialsLocationFile));
+		for (Coord coord7 : locationsRead7) {
+			// Mirroring all points if map data is mirrored
+			if (map.isMirrored()) {
+				coord7.setLocation(coord7.getX(), -coord7.getY());
+			}
+			coord7.translate(offset.getX(), offset.getY());
+			this.burials.add(coord7);
+		}
+		// Chose a random position for the burials location 
+		int seventhRandom = this.getRandom(0,this.burials.size()-1);
+		this.someBurialLocation = this.burials.get(seventhRandom).clone();
+		} catch (Throwable t) {
+			System.out.println("Reading the burials location file permanently failed");
+			System.out.println("someBurialLocation " + this.someBurialLocation);
+		}
+		
 		// Read airport locations into local array
 		this.airport = new LinkedList<Coord>();
 		try {
@@ -331,8 +395,7 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 			System.out.println("somePointLocation " + this.someAirportLocation);
 		}
 		
-		// Home location 
-		this.lastLocation = this.someAirportLocation;
+		this.lastLocation = this.someHomeLocation;
 		
 		// Set initial mode
 		this.mode = GO_TO_OSOCC;
@@ -341,26 +404,31 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 	}
 
 	/**
-	 * Construct a new DisasterReliefActivityMovement instance from a prototype
+	 * Construct a new OfficialsActivityMovement instance from a prototype
 	 * @param prototype
 	 */
-	public DisasterReliefActivityMovement(DisasterReliefActivityMovement prototype) {
+	public OfficialsActivityMovement(OfficialsActivityMovement prototype) {
 		super(prototype);
 		this.pathFinder = prototype.pathFinder;
 		
 		// Loading settings via default settings file
-		this.dayLength = prototype.getDayLength();
-		this.nbrOfDays = prototype.getNbrOfDays(); 
+		this.nbrOfDays = prototype.getNbrOfDays();
 		this.placesToVisit = prototype.getPlacesToVisit(); 
+		this.homes = prototype.getHomes(); 
 		this.mainPoints = prototype.getMainPoints(); 
 		this.osocc = prototype.getOsocc(); 
 		this.baseCamp = prototype.getBaseCamp(); 
 		this.townHall  = prototype.getTownHall(); 
 		this.foodWater = prototype.getFoodWater(); 
+		this.burials = prototype.getBurials(); 
 		this.airport = prototype.getAirport(); 
 		
 		// Set day counter to 0 since we start our simulation at day 0 
 		this.dayCounter = 0;
+		
+		// Chose a random position for the home location
+		int firstRandom = this.getRandom(0,this.homes.size()-1);
+		this.someHomeLocation = this.homes.get(firstRandom).clone();
 		
 		// Chose a random position for the main points location
 		int secondRandom = this.getRandom(0,this.mainPoints.size()-1);
@@ -382,12 +450,15 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 		int sixthRandom = this.getRandom(0,this.foodWater.size()-1);
 		this.someFoodLocation = this.foodWater.get(sixthRandom).clone();
 		
+		// Chose a random position for the burials location 
+		int seventhRandom = this.getRandom(0,this.burials.size()-1);
+		this.someBurialLocation = this.burials.get(seventhRandom).clone();
+		
 		// Chose a random position for a main street point location
 		int eightRandom = this.getRandom(0,this.airport.size()-1);
 		this.someAirportLocation = this.airport.get(eightRandom).clone();
 		
-		// Home location
-		this.lastLocation = this.someAirportLocation;
+		this.lastLocation = this.someHomeLocation;
 		
 		// Set initial mode
 		this.mode = GO_TO_OSOCC;
@@ -494,13 +565,62 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 					
 					// Ensuring that the last location is always updated after we finish the path creation method
 					this.lastLocation = nextLocation.clone();
+					this.mode = GO_TO_BASE_CAMP; 
+					
+					// Calculating a waiting time to be sure that we don't arrive "too early"
+					this.waitingTime = generateHomeWaitTime();
+					this.startedActivityTime = SimClock.getTime(); 
+					return path;
+				}
+				else {
+					// We still need to idle a bit
+					break;
+				}
+			}
+			case GO_TO_BASE_CAMP: {
+				// GO_TO_BASE_CAMP -> Going to the base camp -> meeting with disaster relief organizations
+				if (SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) {
+					// Now we are sure that we waited long enough -> Go to base camp
+					
+					// Now we can calculate the PATH to base camp
+
+					// Calculation of path to base camp
+					SimMap map = super.getMap();
+					if (map == null) {
+						System.out.println("Error while getting map!");
+						return null;
+					}
+					
+					// Going to base camp
+					this.nextLocation = someBaseCampLocation.clone(); 
+					
+					// Creating the path 
+					Path path = new Path(generateSpeed());
+					try {
+						// Town hall -> to base camp
+						MapNode fromNode = map.getNodeByCoord(lastLocation); // Town hall
+						MapNode toNode = map.getNodeByCoord(nextLocation); // Base camp
+						List<MapNode> nodePath = pathFinder.getShortestPath(fromNode, toNode);
+		
+						for (MapNode node : nodePath) {
+							path.addWaypoint(node.getLocation());
+							}
+					}
+					catch (Throwable t)
+					{
+						System.out.println("Error while creating the path!");
+						t.printStackTrace();
+					}
+					
+					// Ensuring that the last location is always updated after we finish the path creation method
+					this.lastLocation = nextLocation.clone();
 					
 					// Ensuring we switch our activity as of the second day according to the parameters we chose for the second day
-					if (this.getRandomDouble() < 0.5) {
-						this.mode = FOOD_WATER_DISTRIBUTION ; 
+					if (this.operationalMode != 0 ) {
+						this.mode = this.operationalMode; 
 					}
 					else {
-						this.mode = MARCHING_IN_STREETS; 
+						this.mode = RECONNAISSANCE_MISSIONS; 
 					}
 					
 					// Calculating a waiting time to be sure that we don't arrive "too early"
@@ -513,10 +633,176 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 					break;
 				}
 			}
+			case RECONNAISSANCE_MISSIONS: {
+				if (startedActivityTime == -1) {
+					// We just (re-)started this activity
+					// Generating a home waiting time
+					this.waitingTime = generateHomeWaitTime(); 
+					// Saving the exact timeslot we started this activity 
+					this.startedActivityTime = SimClock.getTime();
+				}
+				// RECONNAISSANCE_MISSIONS -> Going on reconnaissance missions -> Exploring the situation in the post disaster area
+				if (SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) {
+					// We're done waiting, we can now go and explore the area
+					if (this.placesToVisit != this.placesCount) {
+						// Increasing the count of places we already visited while exploring the area
+						this.placesCount++; 
+
+						// Now we can calculate the PATH to go on reconnaissance mission
+
+						// Selecting a main point location for the reconnaissance mission
+						int firstRandom = this.getRandom(0,this.mainPoints.size()-1);
+						// Setting nextLocation to mainPoints location
+						this.nextLocation = this.mainPoints.get(firstRandom).clone();
+						
+						// Calculation of path to go on reconnaissance mission
+						SimMap map = super.getMap();
+						if (map == null) {
+							System.out.println("Error while getting map!");
+							return null;
+						}
+						// Creating the path 
+						Path path = new Path(generateSpeed());
+						try {
+							// From actual location -> To selected reconnaissance mission location
+							MapNode fromNode = map.getNodeByCoord(lastLocation); // Actual location
+							MapNode toNode = map.getNodeByCoord(nextLocation); // Reconnaissance mission location
+							List<MapNode> nodePath = pathFinder.getShortestPath(fromNode, toNode);
+			
+							for (MapNode node : nodePath) {
+								path.addWaypoint(node.getLocation());
+								}
+						}
+						catch (Throwable t)
+						{
+							System.out.println("Error while creating the path!");
+							t.printStackTrace();
+						}
+						
+						// Ensuring that the last location is always updated after we finish the path creation method
+						this.lastLocation = nextLocation.clone();
+						
+						// Calculating a waiting time to be sure that we don't arrive "too early"
+						this.startedActivityTime = SimClock.getTime();
+						this.waitingTime = generateHomeWaitTime(); 
+						
+						return path;
+					}
+					else {
+						// we visited enough places for exploring the area, now go back home 
+						this.mode = GO_HOME;
+						// Calculating a waiting time to be sure that we don't arrive "too early"
+						this.startedActivityTime = SimClock.getTime();
+						this.waitingTime = generateHomeWaitTime(); 
+						break; 
+					}
+				}
+				else {
+					// We still need to idle since we haven't waited enough
+					break;
+				}
+			}
+			case GO_HOME: {
+				// GO_HOME -> Go home after being around the city all day
+				if (SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) {
+					// Now we are sure that we waited long enough -> Go home and then sleep there 
+					
+					// Now we can calculate the PATH to go back home	
+
+					// Calculation of path back home
+					SimMap map = super.getMap();
+					if (map == null) {
+						System.out.println("Error while getting map!");
+						return null;
+					}
+					
+					// Going back to the home location
+					this.nextLocation = someHomeLocation.clone(); 
+					
+					// Creating the path 
+					Path path = new Path(generateSpeed());
+					try {
+						// From actual location -> To Home
+						MapNode fromNode = map.getNodeByCoord(lastLocation); // Actual location
+						MapNode toNode = map.getNodeByCoord(nextLocation); // Home
+						List<MapNode> nodePath = pathFinder.getShortestPath(fromNode, toNode);
+		
+						for (MapNode node : nodePath) {
+							path.addWaypoint(node.getLocation());
+							}
+					}
+					catch (Throwable t)
+					{
+						System.out.println("Error while creating the path!");
+						t.printStackTrace();
+					}
+					
+					// Ensuring that the last location is always updated after we finish the path creation method
+					this.lastLocation = nextLocation.clone();
+					this.mode = IDLE_MODE; 
+					
+					// Calculating a waiting time to be sure that we don't arrive "too early" at our home location!
+					this.waitingTime = generateHomeWaitTime();
+					this.startedActivityTime = SimClock.getTime(); 
+					return path;
+				}
+				else {
+					// We still need to idle a bit
+					break;
+				}
+			}
+			case IDLE_MODE: {
+				// IDLE_MODE -> Before switching to the sleep activity 
+				if ((SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) && (SimClock.getTime() > (this.SECONDS_IN_A_DAY *(this.dayCounter+1)))) {
+					// We can continue if a) the actual SimClock time is greater than the old startedActivtyTime plus the current waiting time and
+					// b) the actual SimClock time is greater than the (SECONDS_IN_A_DAY) times (the dayCounter +1), which means we successfully simulated one more day
+					// we are done ideling -> now we can safely switch to sleep activity 
+					
+					// Checking weather to organize food and water distribution or burials the next day (50/50 chance)
+					double tmp = this.getRandomDouble(); 
+					if (tmp <= 0.3)
+					{
+						// We're going to organize food and water distribution the next day
+						this.operationalMode = FOOD_WATER_DISTRIBUTION; 
+					}
+					if ((tmp > 0.3) && (tmp <= 0.6))
+					{
+						// We're going to organize burials the next day
+						this.operationalMode = ORGANIZE_BURIAL; 
+					}
+					if (tmp > 0.6)
+					{
+						// We're going to conduct reconnaissance missions the next day
+						this.operationalMode = RECONNAISSANCE_MISSIONS; 
+					}
+					
+					// Reset places count to 0 so that we can restart the activity tomorrow 
+					this.placesCount = 0; 
+					// Reset mode such that we go to OSOCC the next morning 
+					this.mode = GO_TO_OSOCC;
+					
+					// Reset parameteres in order to restart officials activity the next day
+					this.ready = true; 
+					this.start = false; 
+
+					this.startedActivityTime = -1;
+				}
+				else {
+					// We still need to idle as it's to early to go to sleep again
+					break;
+				}
+			}
 			case FOOD_WATER_DISTRIBUTION: {
 				// FOOD_WATER_DISTRIBUTION -> We go to food and water distribution locations (for helping with the distribution)
+				if (startedActivityTime == -1) {
+					// We just (re-)started this activity
+					// Generating a home waiting time
+					this.waitingTime = generateHomeWaitTime(); 
+					// Saving the exact timeslot we started this activity 
+					this.startedActivityTime = SimClock.getTime();
+				}
 				if (SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) {
-					// We're done waiting, we can now go to distribute food and water
+						// We're done waiting, we can now go to distribute food and water
 
 						// Now we can calculate the PATH to go distribute food and water
 
@@ -566,239 +852,85 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 					break;
 				}
 			}
-			case MARCHING_IN_STREETS: {
-				// MARCHING_IN_STREETS -> Some disaster relief organizations are marching through the streets, helping locals where they can (providing food, clearing rubble etc.)
+			case ORGANIZE_BURIAL: {
+				if (startedActivityTime == -1) {
+					// We just (re-)started this activity
+					// Generating a home waiting time
+					this.waitingTime = generateHomeWaitTime(); 
+					// Saving the exact timeslot we started this activity 
+					this.startedActivityTime = SimClock.getTime();
+				}
+				// ORGANIZE_BURIAL -> Organize burials outsite the city center
 				if (SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) {
-					// We waited long enough, we are now going to walk around the streets helping our neighborhood while marching through the city's streets
-					
-					// Now we can calculate the PATH to go marching through the streets
+					// We're done waiting, we can now go to go a burial location
+					if (this.placesToVisit != this.placesCount) {
+						// Increasing the count of burial places we already went to
+						this.placesCount++;
 
-					// Calculation of path for marching through the streets
-					SimMap map = super.getMap();
-					if (map == null) {
-						System.out.println("Error while getting map!");
+						// Now we can calculate the PATH to go a burial location
+
+						// Selecting a burial location
+						int firstRandom = this.getRandom(0,this.burials.size()-1);
+						// Setting nextLocation to burials location
+						this.nextLocation = this.burials.get(firstRandom).clone();
+						
+						// Calculation of path to a burial location
+						SimMap map = super.getMap();
+						if (map == null) {
+							System.out.println("Error while getting map!");
 							return null;
-					}
-					
-					// The node we want to go to
-					MapNode newToNode = null; 
-					
-					// Calculating next location we're going to
-					if (this.placesCount == 0) {
-						// We first (re-)started the marching through the streets sub-activity, so we chose a random location on the map as a starting point
-						int firstRandom = this.getRandom(0,this.mainPoints.size()-1);
-						this.nextLocation = this.mainPoints.get(firstRandom).clone();
-						// Map location toNode
-						newToNode = map.getNodeByCoord(this.nextLocation);
-						this.waitingTime = generateHomeWaitTime();
-						this.placesCount++;
-					}
-					else if (this.placesCount <= this.placesToVisit) {
-						// We can still continue with our sub-activity, visiting the next house on this street
-						this.placesCount++;
-						this.waitingTime = generateHomeWaitTime();
-					}
-					else if (this.placesCount > this.placesToVisit) {
-						// After visiting one last place we jump to the next mode and we're done for today -> now go back home
-						this.mode = GO_HOME;
-						this.placesCount++;
-						this.waitingTime = generateHomeWaitTime();
-						this.startedActivityTime = SimClock.getTime(); 
-					}
-					
-					// Important to know -> Even if "mainPoints" is an ArrayList, simply taking the next element won't work in our case since the ArrayList
-					// is not geographically sorted and thus the next element (after our position in the list) is generally not geographically close to our position!
-					
-					if (this.placesCount != 0) {
-						// Obtaining the list of node neighbors, thus nodes geographically close to our location
-						List<MapNode> neighbors = new ArrayList<MapNode>();
+						}
+						// Creating the path 
+						Path path = new Path(generateSpeed());
 						try {
-							// catching the very rare case that this.nextLocation would have no valid coords & avoid a null pointer via this try-catch block
-							neighbors = map.getNodeByCoord(this.nextLocation).getNeighbors();						
+							// From actual location -> To burial location
+							MapNode fromNode = map.getNodeByCoord(lastLocation); // Actual location
+							MapNode toNode = map.getNodeByCoord(nextLocation); //Burial location
+							List<MapNode> nodePath = pathFinder.getShortestPath(fromNode, toNode);
+			
+							for (MapNode node : nodePath) {
+								path.addWaypoint(node.getLocation());
+							}
 						}
 						catch (Throwable t)
 						{
-							System.out.println("No such location - chosing a new, but random, location!");
-							// Setting a new random neighbor to avoid null pointer
-							int firstRandom = this.getRandom(0,this.mainPoints.size()-1);
-							this.nextLocation = this.mainPoints.get(firstRandom).clone();
-							neighbors = map.getNodeByCoord(this.nextLocation).getNeighbors();	
-						}
-						while (neighbors.size() == 0) {
-							// We have no neighbors anymore -> chose new random position 
-							int firstRandom = this.getRandom(0,this.mainPoints.size()-1);
-							neighbors = map.getNodeByCoord(this.nextLocation).getNeighbors();
-						}
-					
-						// Chose a location to walk to 
-						double closestDistance = Integer.MAX_VALUE;
-						double furthestDistance = 0;
-						double thisDistance = 0;
-						MapNode closestNeighbor = null;
-						MapNode furthestNeighbor = null;
-						for (int j = 0; j < neighbors.size(); j++) {
-							thisDistance = this.nextLocation.distance(neighbors.get(j).getLocation()); 
-							if (thisDistance < closestDistance) {
-								// We found the geographically closest neighbor
-								closestDistance = thisDistance;
-								closestNeighbor = neighbors.get(j);
-							}
-							if (thisDistance > furthestDistance) {
-								// We found the geographically furthest neighbor
-								furthestDistance = thisDistance;
-								furthestNeighbor = neighbors.get(j);
-							}
-						}
-
-						if (closestNeighbor == null) {
-							// Avoid the very rare case that we have so few neighbors that we would run in a null pointer exception otherwise
-							closestNeighbor = neighbors.get(0);
+							System.out.println("Error while creating the path!");
+							t.printStackTrace();
 						}
 						
-						if (furthestNeighbor == null) {
-							// Avoid the very rare case that we have so few neighbors that we would run in a null pointer exception otherwise
-							furthestNeighbor = neighbors.get(0);
-						}
+						// Ensuring that the last location is always updated after we finish the path creation method
+						this.lastLocation = nextLocation.clone();
 						
-						if (this.placesCount % 2 == 0) {
-							// Go to closest neighbor 
-							try {
-								newToNode = map.getNodeByCoord(closestNeighbor.getLocation().clone());
-								this.nextLocation = closestNeighbor.getLocation().clone();
-							}
-							catch (Throwable t)
-							{
-								System.out.println("No such neighbor available!");
-								t.printStackTrace();
-							}
-						}
-						else {
-							// Go to furthest neighbor 
-							try {
-								newToNode = map.getNodeByCoord(furthestNeighbor.getLocation().clone());
-								this.nextLocation = furthestNeighbor.getLocation().clone();
-							}
-							catch (Throwable t)
-							{
-								System.out.println("No such neighbor available!");
-								t.printStackTrace();
-							}
-						}
+						// Calculating a waiting time to be sure that we don't arrive "too early"
+						this.startedActivityTime = SimClock.getTime();
+						this.waitingTime = generateHomeWaitTime(); 
+						
+						return path;
 					}
-					
-					// Creating the path 
-					Path path = new Path(generateSpeed());
-					try {
-						// From -> To location as calculated above
-						MapNode fromNode = map.getNodeByCoord(lastLocation); // Actual location
-						// Use calculated toNode from above
-						MapNode toNode = newToNode; 
-						List<MapNode> nodePath = pathFinder.getShortestPath(fromNode, toNode);
-		
-						for (MapNode node : nodePath) {
-							path.addWaypoint(node.getLocation());
-							}
+					else {
+						// we've been to enough burial places, now go back home 
+						this.mode = GO_HOME;
+						// Calculating a waiting time to be sure that we don't arrive "too early"
+						this.startedActivityTime = SimClock.getTime();
+						this.waitingTime = generateHomeWaitTime(); 
+						break; 
 					}
-					catch (Throwable t)
-					{
-						System.out.println("Error while creating the path!");
-						t.printStackTrace();
-					}
-					
-					// Ensuring that the last location is always updated after we finish the path creation method
-					this.lastLocation = nextLocation.clone();
-					// Saving the actual activity time
-					this.startedActivityTime = SimClock.getTime();
-					
-					return path;
 				}
 				else {
-					// We still need to idle while marching through the streets
-					break;
-				}
-			}
-			case GO_HOME: {
-				// GO_HOME -> Go home after being around the city all day
-				if (SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) {
-					// Now we are sure that we waited long enough -> Go home and then sleep there 
-					
-					// Now we can calculate the PATH to go back home	
-
-					// Calculation of path back home
-					SimMap map = super.getMap();
-					if (map == null) {
-						System.out.println("Error while getting map!");
-							return null;
-					}
-					
-					// Going back to the home location
-					this.nextLocation = someBaseCampLocation.clone(); 
-					
-					// Creating the path 
-					Path path = new Path(generateSpeed());
-					try {
-						// From actual location -> To Home
-						MapNode fromNode = map.getNodeByCoord(lastLocation); // Actual location
-						MapNode toNode = map.getNodeByCoord(nextLocation); // Home
-						List<MapNode> nodePath = pathFinder.getShortestPath(fromNode, toNode);
-		
-						for (MapNode node : nodePath) {
-							path.addWaypoint(node.getLocation());
-							}
-					}
-					catch (Throwable t)
-					{
-						System.out.println("Error while creating the path!");
-						t.printStackTrace();
-					}
-					
-					// Ensuring that the last location is always updated after we finish the path creation method
-					this.lastLocation = nextLocation.clone();
-					this.mode = IDLE_MODE; 
-					
-					// Calculating a waiting time to be sure that we don't arrive "too early" at our home location!
-					this.waitingTime = generateHomeWaitTime();
-					this.startedActivityTime = SimClock.getTime(); 
-					return path;
-				}
-				else {
-					// We still need to idle a bit
-					break;
-				}
-			}
-			case IDLE_MODE: {
-				// IDLE_MODE -> Before switching to the sleep activity 
-				if ((SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) && (SimClock.getTime() > (this.dayLength*(this.dayCounter+1)))) {
-					// We can continue if a) the actual SimClock time is greater than the old startedActivtyTime plus the current waiting time and
-					// b) the actual SimClock time is greater than the (dayLength) times (the dayCounter +1), which means we successfully simulated one more day
-					// we are done ideling -> now we can safely switch to sleep activity 
-					
-					// Reset places count to 0 so that we can restart the activity tomorrow 
-					this.placesCount = 0; 
-					// Reset mode such that we go to OSOCC the next morning 
-					this.mode = GO_TO_OSOCC;
-					
-					// Reset parameteres in order to restart disaster relief activity the next day
-					this.ready = true; 
-					this.start = false; 
-
-					this.startedActivityTime = -1; 
-				}
-				else {
-					// We still need to idle as it's to early to go to sleep again
+					// We still need to idle since we haven't waited enough
 					break;
 				}
 			}
 		  }
-		}
+	    }
 		return null; 
 	}
-		
+	
 	@Override
 	protected double generateWaitTime() {
 		// Since our movement model is more or less fixed by the parameters loaded from the external default settings file we don't really need this function
 		// Especially since generateWaitTime() is called by internal functions of the ONE after each getPath() method has returned, so we just use this here as a simple step counter
-		// The reason is that we don't need this function in the disaster relief organization activity, yet we can make use of it to step trough our programm 
+		// The reason is that we don't need this function in the officials activity, yet we can make use of it to step trough our programm 
 		// The value of 100 is arbitrary, yet values shouln't be too big or small in order that the ONE operates properly
 		return 100;
 	}
@@ -814,17 +946,38 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 		double tmpWaitTime = this.getRandomDouble()*20000;
 		return tmpWaitTime;
 	}
-		
+	
+	
 	@Override
 	public Coord getInitialLocation() {
 		// We initially start being at home
-		return someBaseCampLocation.clone();
+		return someHomeLocation.clone();
 	}
 	
-	public Coord getLastLocation() {
-		return lastLocation.clone();
+	public void setLocation(Coord c) {
+		this.lastLocation = c.clone(); 
+	}
+	
+	// Important since we need to know the last location of the node before switching to any other activity (otherwise we'll get null pointer exceptions!)
+	public Coord getSomeUNLocation() {
+		return this.someAirportLocation.clone();
+	}
+	
+	// Important since we need to know the last location of the node before switching to any other activity (otherwise we'll get null pointer exceptions!)
+	public Coord getSomeGOVLocation() {
+		return this.someHomeLocation.clone();
 	}
 
+	// Method required for setting a correct initial location before the activity is launched -> Mandatory (if not you'll get null pointer exceptions!)
+	public void setInitialLocation(Coord location) {
+		this.lastLocation = location;
+	}
+	
+	public List<Coord> getHomes()
+	{
+		return this.homes; 
+	}
+	
 	public List<Coord> getMainPoints()
 	{
 		return this.mainPoints; 
@@ -850,15 +1003,20 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 		return this.foodWater; 
 	}
 	
+	public List<Coord> getBurials()
+	{
+		return this.burials; 
+	}
+	
 	public List<Coord> getAirport()
 	{
 		return this.airport; 
 	}
-
+	
 	public double getPlacesToVisit() {
 		return this.placesToVisit; 
 	}
-	
+
 	// Get random int value, between provided min and max; returns 0 if invalid argument is provided 
 	private int getRandom(int min, int max) {
 		if ((min >= 0) && (max > 0)) {
@@ -872,20 +1030,12 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 		return rng.nextDouble();
 	}
 
-	public double getDayLength() {
-		return this.dayLength; 
-	}
-	
 	public int getNbrOfDays() {
 		return this.nbrOfDays; 
 	}
 	
-	public void setInitialLocation(Coord c) {
-		this.lastLocation = c.clone(); 
-	}
-
-	// Function for (re-) activating our disaster relief mode
-	// Function is to be called at the end of any other activity such that we can (re-) activate the disaster relief mode
+	// Function for (re-) activating our officials mode
+	// Function is to be called at the end of any other activity such that we can (re-) activate the officials mode
 	public void Activate(int dayCounter) {
 		this.dayCounter = dayCounter; 
 		// True -> means we can start this activity at anytime as of now
@@ -895,7 +1045,7 @@ public class DisasterReliefActivityMovement extends MapBasedMovement implements 
 	}
 
 	// Returns false if we haven't finished yet
-	// Returns true if we are done with our disaster relief activity so other activities know that we are ready to switch back such that they can proceed with their operations
+	// Returns true if we are done with our officials activity so other activities know that we are ready to switch back such that they can proceed with their operations
 	public boolean isReady() {
 		return this.ready; 
 	}

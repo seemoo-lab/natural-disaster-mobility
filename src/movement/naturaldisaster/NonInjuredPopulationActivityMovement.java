@@ -2,10 +2,13 @@
  * Copyright 2015 Tom Schons - TU Darmstadt, Germany
  * Released under GPLv3. See LICENSE.txt for details.
  */
-package movement;
+package movement.naturaldisaster;
 
 import java.util.List;
-import java.util.Arrays;
+
+import movement.MapBasedMovement;
+import movement.Path;
+import movement.SwitchableMovement;
 import movement.map.DijkstraPathFinder;
 import movement.map.MapNode;
 import core.Coord;
@@ -14,10 +17,8 @@ import core.Settings;
 import input.WKTReader;
 import java.io.File;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ArrayList;
 import movement.map.SimMap;
-import java.util.Random;
 import core.SimClock;
 
 /**
@@ -35,7 +36,6 @@ import core.SimClock;
 public class NonInjuredPopulationActivityMovement extends MapBasedMovement implements SwitchableMovement {
 
 	// Constants for importing settings from default settings file
-	public static final String DAY_LENGTH = "dayLength";
 	public static final String NUMBER_OF_DAYS = "nbrOfDays";
 	public static final String SLEEPING_TIME_MIN = "sleepingTimeMin";
 	// Number of neighbors in near surroundings to be visited
@@ -54,7 +54,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 	public static final String FOOD_LOCATION_FILE_SETTINGS = "foodLocationFile";
 	
 	// Length of the day in seconds
-	private double dayLength; 
+	private static final int SECONDS_IN_A_DAY = 24 * 60 * 60;
 	// Number of days
 	private int nbrOfDays; 
 	 // Maximum sleeping time an individual has (in seconds)
@@ -149,13 +149,6 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 		pathFinder = new DijkstraPathFinder(null);
 
 		// Loading settings via default settings file
-		if (settings.contains(DAY_LENGTH)) {
-			this.dayLength = settings.getDouble(DAY_LENGTH);
-		}
-		else {
-			System.out.println("You didn't specify a value for the day length!");
-			System.out.println("dayLength: " + this.dayLength); 
-		} 
 		if (settings.contains(NUMBER_OF_DAYS)) {
 			this.nbrOfDays = settings.getInt(NUMBER_OF_DAYS);
 		}
@@ -310,8 +303,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 		this.pathFinder = prototype.pathFinder;
 		
 		// Loading settings via default settings file
-		this.dayLength = prototype.getDayLength();
-		this.nbrOfDays = prototype.getNbrOfDays(); 
+		this.nbrOfDays = prototype.getNbrOfDays();
 		this.neighborsToVisit = prototype.getNeighborsToVisit(); 
 		this.placesToVisit = prototype.getPlacesToVisit(); 
 		this.sleepingTimeMin = prototype.getSleepingTimeMin(); 
@@ -864,9 +856,9 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 			}
 			case IDLE_MODE: {
 				// IDLE_MODE -> Used when we returned home but it's "too early" to switch back to sleep mode
-				if ((SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) && (SimClock.getTime() > (this.dayLength*(this.dayCounter+1)))) {
+				if ((SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) && (SimClock.getTime() > (this.SECONDS_IN_A_DAY *(this.dayCounter+1)))) {
 					// We can continue if a) the actual SimClock time is greater than the old startedActivtyTime plus the current waiting time and
-					// b) the actual SimClock time is greater than the (dayLength) times (the dayCounter +1), which means we successfully simulated one more day
+					// b) the actual SimClock time is greater than the (SECONDS_IN_A_DAY) times (the dayCounter +1), which means we successfully simulated one more day
 					// we are done ideling -> now we can safely switch to sleep activity 
 					
 					// Reset parameteres in order to restart non-injured activity next day
@@ -964,11 +956,7 @@ public class NonInjuredPopulationActivityMovement extends MapBasedMovement imple
 	private double getRandomDouble() {
 		return rng.nextDouble();
 	}
-	
-	public double getDayLength() {
-		return this.dayLength; 
-	}
-	
+
 	public int getNbrOfDays() {
 		return this.nbrOfDays; 
 	}

@@ -2,10 +2,13 @@
  * Copyright 2015 Tom Schons - TU Darmstadt, Germany
  * Released under GPLv3. See LICENSE.txt for details.
  */
-package movement;
+package movement.naturaldisaster;
 
 import java.util.List;
 
+import movement.MapBasedMovement;
+import movement.Path;
+import movement.SwitchableMovement;
 import movement.map.DijkstraPathFinder;
 import movement.map.MapNode;
 import core.Coord;
@@ -14,9 +17,8 @@ import core.Settings;
 import input.WKTReader;
 import java.io.File;
 import java.util.LinkedList;
-import java.util.List;
+
 import movement.map.SimMap;
-import java.util.Random;
 import core.SimClock;
 
 /**
@@ -31,7 +33,6 @@ import core.SimClock;
 public class InjuredPopulationActivityMovement extends MapBasedMovement implements SwitchableMovement {
 
 	// Constants for importing settings from default settings file
-	public static final String DAY_LENGTH = "dayLength";
 	public static final String NUMBER_OF_DAYS = "nbrOfDays";
 	public static final String SLEEPING_TIME_MIN = "sleepingTimeMin";
 
@@ -44,7 +45,7 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 	public static final String HOME_LOCATION_FILE_SETTING = "homeLocationFile";
 	
 	// Length of the day in seconds
-	private double dayLength; 
+	private static final int SECONDS_IN_A_DAY = 24 * 60 * 60;
 	// Number of days
 	private int nbrOfDays; 
 	 // Maximum sleeping time an individual has (in seconds)
@@ -122,13 +123,6 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 		pathFinder = new DijkstraPathFinder(null);
 		
 		// Loading settings via default settings file
-		if (settings.contains(DAY_LENGTH)) {
-			this.dayLength = settings.getDouble(DAY_LENGTH);
-		}
-		else {
-			System.out.println("You didn't specify a value for the day length!");
-			System.out.println("dayLength: " + this.dayLength); 
-		} 
 		if (settings.contains(NUMBER_OF_DAYS)) {
 			this.nbrOfDays = settings.getInt(NUMBER_OF_DAYS);
 		}
@@ -242,8 +236,7 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 		this.pathFinder = prototype.pathFinder;
 		
 		// Loading settings via default settings file
-		this.dayLength = prototype.getDayLength();
-		this.nbrOfDays = prototype.getNbrOfDays(); 
+		this.nbrOfDays = prototype.getNbrOfDays();
 		this.homes = prototype.getHomes(); 
 		this.hospital = prototype.getHospitals(); 
 		this.sleepingTimeMin = prototype.getSleepingTimeMin(); 
@@ -434,9 +427,9 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 			}
 			case IDLE_MODE: {
 				// IDLE_MODE -> Used when we returned home but it's "too early" to switch back to sleep mode 
-				if ((SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) && (SimClock.getTime() > (this.dayLength*(this.dayCounter+1)))) {
+				if ((SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) && (SimClock.getTime() > (this.SECONDS_IN_A_DAY *(this.dayCounter+1)))) {
 					// We can continue if a) the actual SimClock time is greater than the old startedActivtyTime plus the current waiting time and
-					// b) the actual SimClock time is greater than the (dayLength) times (the dayCounter +1), which means we successfully simulated one more day
+					// b) the actual SimClock time is greater than the (SECONDS_IN_A_DAY) times (the dayCounter +1), which means we successfully simulated one more day
 					// we are done ideling -> now we can safely switch to sleep activity 
 					
 					// Reset parameteres in order to restart injured activity next day
@@ -455,7 +448,7 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 				if (unableToGoToHospital) {
 					// Should actually always be true when we specifically chose to enter this mode (if everything went fine)  
 					// We're not able to go to hospital on our own!
-					if ((SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) && (SimClock.getTime() > (this.dayLength*(this.dayCounter+1)))) {
+					if ((SimClock.getTime() >= (this.startedActivityTime + this.waitingTime)) && (SimClock.getTime() > (this.SECONDS_IN_A_DAY *(this.dayCounter+1)))) {
 						// Basically we're done waiting, but since there is nothing more to do we continue to wait
 						this.startedActivityTime = SimClock.getTime();
 						ready = true; 
@@ -532,11 +525,7 @@ public class InjuredPopulationActivityMovement extends MapBasedMovement implemen
 	private double getRandomDouble() {
 		return rng.nextDouble();
 	}
-	
-	public double getDayLength() {
-		return this.dayLength; 
-	}
-	
+
 	public int getNbrOfDays() {
 		return this.nbrOfDays; 
 	}

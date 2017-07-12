@@ -2,21 +2,13 @@
  * Copyright 2015 Tom Schons - TU Darmstadt, Germany
  * Released under GPLv3. See LICENSE.txt for details.
  */
-package movement;
+package movement.naturaldisaster;
 
-import java.util.List;
-
-import movement.map.DijkstraPathFinder;
-import movement.map.MapNode;
-import core.Coord;
 import core.Settings;
 import core.SimClock;
-import input.WKTReader;
-import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
-import movement.map.SimMap;
-import java.util.Random;
+import movement.MapBasedMovement;
+import movement.Path;
+import movement.SwitchableMovement;
 
 /**
  * SleepActivityMovement class
@@ -33,7 +25,6 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 	// Constants for importing settings from default settings file
 	public static final String SLEEPING_TIME_MIN = "sleepingTimeMin";
 	public static final String SLEEPING_TIME_MAX = "sleepingTimeMax";
-	public static final String DAY_LENGTH = "dayLength";
 	public static final String NUMBER_OF_DAYS = "nbrOfDays";
 	public static final String OFFSET_START_DELAY = "offsetStartDelay";
 
@@ -45,7 +36,7 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 	 // Maximum sleeping time an individual has (in seconds)
 	private double sleepingTimeMax; 
 	// Length of the day in seconds
-	private double dayLength;  
+	private static final int SECONDS_IN_A_DAY = 24 * 60 * 60;
 	// Number of days
 	private int nbrOfDays; 
 	// Offset that is added to delay the start of this particular activity 
@@ -90,13 +81,6 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 			System.out.println("You didn't specify a value for the maximum sleeping time!");
 			System.out.println("sleepingTimeMax: " + this.sleepingTimeMax); 
 		}
-		if (settings.contains(DAY_LENGTH)) {
-			this.dayLength = settings.getDouble(DAY_LENGTH);
-		}
-		else {
-			System.out.println("You didn't specify a value for the day length!");
-			System.out.println("dayLength: " + this.dayLength); 
-		} 
 		if (settings.contains(NUMBER_OF_DAYS)) {
 			this.nbrOfDays = settings.getInt(NUMBER_OF_DAYS);
 		}
@@ -140,8 +124,7 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 		// Loading settings via default settings file
 		this.sleepingTimeMin = prototype.getSleepingTimeMin();
 		this.sleepingTimeMax = prototype.getSleepingTimeMax(); 
-		this.dayLength = prototype.getDayLength(); 
-		this.nbrOfDays = prototype.getNbrOfDays(); 
+		this.nbrOfDays = prototype.getNbrOfDays();
 		this.offsetStartDelay = prototype.getOffsetStartDelay(); 
 		
 		// Generating our own sleep time
@@ -168,13 +151,13 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 		// Calculating wheather or not we finished our sleeping activity
 		// We only run into this if clause if a) the simulation has started b) our activity is activated right now c) the simulation hasn't reached it's end yet 
 		if ((SimClock.getTime() > 0) && (start) && (this.dayCounter != this.nbrOfDays)) {    
-				if (SimClock.getTime() > ((this.dayCounter * this.dayLength) + this.sleepTime)) {
+				if (SimClock.getTime() > ((this.dayCounter * this.SECONDS_IN_A_DAY) + this.sleepTime)) {
 					// If we are here we are sure that we slept enough for today
 					this.doneSleeping = true;
 					this.ready = true;
 					this.start = false;
 				}
-				else if (SimClock.getTime() < ((this.dayCounter * this.dayLength) + this.sleepTime)) {
+				else if (SimClock.getTime() < ((this.dayCounter * this.SECONDS_IN_A_DAY) + this.sleepTime)) {
 					// If we are here we are sure that we still need to sleep a bit more for today
 					// So me just idle here 
 				}
@@ -244,11 +227,7 @@ public class SleepActivityMovement extends MapBasedMovement implements Switchabl
 	public double getSleepingTimeMax() {
 		return this.sleepingTimeMax; 
 	}
-	
-	public double getDayLength() {
-		return this.dayLength; 
-	}
-	
+
 	public int getNbrOfDays() {
 		return this.nbrOfDays; 
 	}

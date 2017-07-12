@@ -2,10 +2,13 @@
  * Copyright 2015 Tom Schons - TU Darmstadt, Germany
  * Released under GPLv3. See LICENSE.txt for details.
  */
-package movement;
+package movement.naturaldisaster;
 
 import java.util.List;
 
+import movement.MapBasedMovement;
+import movement.Path;
+import movement.SwitchableMovement;
 import movement.map.DijkstraPathFinder;
 import movement.map.MapNode;
 import core.Coord;
@@ -14,9 +17,8 @@ import core.Settings;
 import input.WKTReader;
 import java.io.File;
 import java.util.LinkedList;
-import java.util.List;
+
 import movement.map.SimMap;
-import java.util.Random;
 import core.SimClock;
 
 /**
@@ -33,9 +35,6 @@ public class GoToAirportActivityMovement extends MapBasedMovement implements Swi
 	// Constants for importing settings from default settings file
 	// Location files loaded via external default settings file (if provided)
 	public static final String AIRPORT_LOCATIONS_FILE_SETTING = "airportLocationsFile";
-	
-	// Seed used for initializing the activity's random number generator such that the same seed will always produce the same output! 
-	private long rngSeed; 
 	
 	// File names of the specfic location files
 	private String airportLocationsFile = null;

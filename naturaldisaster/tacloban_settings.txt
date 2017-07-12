@@ -10,7 +10,7 @@
 Scenario.name = Tacloban
 Scenario.simulateConnections = true
 Scenario.updateInterval = 0.1
-# The value of Scenario.endTime calculated as Group.nbrOfDays * Group.dayLength + Group.msgTtl (inputs below)
+# The value of Scenario.endTime calculated as 7 days + Group.msgTtl
 Scenario.endTime = 626400
 # Defining 7 different node groups to be simulated
 Scenario.nrofHostGroups = 7
@@ -61,12 +61,12 @@ Group.nrofInterfaces = 1
 Group.interface1 = btInterface
 # Message TTL of (6 hours)
 Group.msgTtl = 360
+
+## Natural Disaster Mobility Model specific settings
 # Minimum sleeping time per day (6h)
 Group.sleepingTimeMin = 21600
 # Maximum sleeping time per day (8h)
 Group.sleepingTimeMax = 28800
-# Length of a single day in simulation, in seconds (24h = 86400s)
-Group.dayLength = 86400
 # Number of days the simulation should run
 Group.nbrOfDays = 7
 # Add an offset delay such that groups can start at different times
@@ -88,54 +88,69 @@ Group.placesToVisit = 5
 Group.neighborsToVisit = 5
 # Probability that individuals are volunteering for disaster relief activities after their duties finished
 Group.reliefVolunteeringProb = 0.5
-# Probability that an individual is too injured to go to hospital on it's on
+# Probability that an individual is too injured to go to hospital on it's own
 Group.tooInjuredForHospitalProb = 0.3
 
+
 ## Settings that have to be set individually for the different groups
-# Group 1 - SCIENTISTS_GROUP_ID - Specific Settings 
-Group1.groupID = 100
+# Group 1 - Scientists - Specific Settings
+Group1.groupID = sci
+# Role
+Group1.role = Scientist
 # Walking speeds
 Group1.speed = 0.5, 1.5
-# Number of hosts in group 
+# Number of hosts in group
 Group1.nrofHosts = 20
 
-# Group 2 - INJURED_GROUP_ID - Specific Settings
-Group2.groupID = 101
+# Group 2 - Injured population - Specific Settings
+Group2.groupID = pi
+# Role
+Group2.role = Injured
 # Walking speeds (values are lower since we are injured)
 Group2.speed = 0.3, 0.9
 # Number of hosts in group
 Group2.nrofHosts = 40
 
-# Group 3 - NONINJURED_GROUP_ID - Specific Settings
-Group3.groupID = 102
+# Group 3 - Healthy population - Specific Settings
+Group3.groupID = ph
+# Role
+Group3.role = Healthy
 # Walking speeds
 Group3.speed = 0.5, 1.5
 # Number of hosts in group
 Group3.nrofHosts = 200
 
-# Group 4 - SEARCH_RESCUE_GROUP_ID - Specific Settings
-Group4.groupID = 103
+# Group 4 - Search and Rescue teams - Specific Settings
+Group4.groupID = sr
+# Role
+Group4.role = SnR
 # Walking speeds (max. value is lower than others since we carry heavy equipment)
 Group4.speed = 0.5, 1.2
 # Number of hosts in group
 Group4.nrofHosts = 50
 
-# Group 5 - GOVERNMENT_GROUP_ID - Specific Settings
-Group5.groupID = 104
+# Group 5 - Government Officials - Specific Settings
+Group5.groupID = gov
+# Role
+Group5.role = Government
 # Walking speeds
 Group5.speed = 0.5, 1.5
 # Number of hosts in group
 Group5.nrofHosts = 50
 
-# Group 6 - UN_GROUP_ID - Specific Settings
-Group6.groupID = 105
+# Group 6 - UN Officials - Specific Settings
+Group6.groupID = un
+# Role
+Group6.role = UN
 # Walking speeds
 Group6.speed = 0.5, 1.5
 # Number of hosts in group
 Group6.nrofHosts = 40
 
-# Group 7 - DRO_GROUP_ID - Specific Settings
-Group7.groupID = 106
+# Group 7 - DROs - Specific Settings
+Group7.groupID = dro
+# Role
+Group7.role = DRO
 # Walking speeds
 Group7.speed = 0.5, 1.5
 # Number of hosts in group
@@ -150,7 +165,7 @@ Events1.class = MessageEventGenerator
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message approx. every 10 seconds)
 Events1.interval = 8,12
-# Message sizes (50kB - 1MB)
+# Message sizes
 Events1.size = 50k,100k
 # range of message source/destination addresses
 Events1.hosts = 0,500
@@ -169,14 +184,13 @@ MovementModel.worldSize = 5000, 7000
 # How long time to move hosts in the world before real simulation
 MovementModel.warmup = 1000
 
-## Map based movement -movement model specific settings
+## Map based movement model specific settings
 MapBasedMovement.nrofMapFiles = 1
 # Location on disk of the map file
 MapBasedMovement.mapFile1 = data/Tacloban/tacloban_big_wkt.wkt
 
 
 ## Reports - all report names have to be valid report classes
-
 # how many reports to load
 Report.nrofReports = 17
 # length of the warm up period (simulated seconds)
@@ -223,7 +237,6 @@ Optimization.randomizeUpdateOrder = true
 
 
 ## GUI settings
-
 # GUI underlay image settings
 GUI.UnderlayImage.fileName = data/Tacloban/tacloban_big.png
 # Image offset in pixels (x, y)
@@ -232,7 +245,6 @@ GUI.UnderlayImage.offset = 0,-10
 GUI.UnderlayImage.scale = 9.6
 # Image rotation (radians)
 GUI.UnderlayImage.rotate = 0.0
-
 # how many events to show in the log panel (default = 30)
 GUI.EventLogPanel.nrofEvents = 100
 # Regular Expression log filter (see Pattern-class from the Java API for RE-matching details)
