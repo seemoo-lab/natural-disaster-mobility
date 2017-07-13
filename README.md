@@ -10,11 +10,11 @@ This repository is a fork of the [Opportunistic Network Environment (ONE) simula
 * `src/movement/` contains the implementations of the sub-mobility models
   * `NaturalDisasterMovementModel.java`: the main mobility model class schedules role-dependent activities 
   * `naturaldisaster/` contains the role-dependent activities (go to the airport, sleep, etc.)
-* `naturaldisaster/` contains the scenario instantiations (`tacloban_settings.txt` and `portauprince_settings.txt`)
+* `.` contains the scenario instantiations (`tacloban_settings.txt` and `portauprince_settings.txt`)
 
 ## Usage
 
-To use the model, simply base your evaluation scenario on one of the scenario instantiations in `naturaldisaster/`. If you plan to create your scenario from scratch, you need to define ...
+To use the model, simply base your evaluation scenario on one of the scenario instantiations. If you plan to create your scenario from scratch, you need to define ...
 
 * `GroupX.role = {Healthy, Injured, Scientist, UN, Government, SnR, DRO}` for each group. This setting is independent from `GroupX.groupID`, so you can have different groups with the same role.
 * `Group.nbrOfDays` as the number of days that the scenario will be run for (in a future version of this model, this could be derived from the `Scenario.endTime` setting)
