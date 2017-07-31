@@ -24,12 +24,14 @@ To use the model, simply base your evaluation scenario on one of the scenario in
 
 For more information on the underlying model, please refer to our paper. If you use this model or code in your own work, we are happy to receive a citation.
 
-> Milan Schmittner, Max Maass, Tom Schons, and Matthias Hollick, “**Reverse Engineering Human Mobility in Large-scale Natural Disasters**,” in *ACM International Conference on Modeling, Analysis and Simulation of Wireless and Mobile Systems (MSWiM)*, November 2017, Miami Beach, USA.
+Milan Schmittner, Max Maass, Tom Schons, and Matthias Hollick, “**Reverse Engineering Human Mobility in Large-scale Natural Disasters**,” in *ACM International Conference on Modeling, Analysis and Simulation of Wireless and Mobile Systems (MSWiM)*, November 2017, Miami Beach, USA.
 
 ## Reproducibility
 
-For the sake of reproducibility, we include the complete evaluation scripts to generate all the plots in our paper. To simulate all scenarios and generate all plots (requires Python packages `numpy` and `matplotlib`), simply run (**Warning**: might take several days to complete):
+For the sake of reproducibility, we provide the complete experimental data set that was used for the plots in our paper (requires Python packages `numpy` and `matplotlib`) at [10.5281/zenodo.836815](https://doi.org/10.5281/zenodo.836815).
+
+Alternatively, you may generate the data set yourself by running (**warning**: simulations might take several days to complete):
 ```
 ./exp.py
 ```
-After completion, experiment data and plots will be available in a folder `out/<DATE>/{reports,plots}`.
+After completion, experiment data and plots will be available in `out/<DATE>/{reports,plots}`.
