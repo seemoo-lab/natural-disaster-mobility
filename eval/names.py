@@ -36,7 +36,7 @@ PLOT_SUFFIX = 'pdf'
 
 
 def report_dir():
-    return os.path.join(exp_dir, 'experiments')
+    return os.path.join(exp_dir, 'reports')
 
 
 def plot_dir():
