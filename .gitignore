@@ -25,3 +25,6 @@ doc/package-list
 
 # Ignore log file
 /*.log
+
+# Ignore experiment data
+/out/
