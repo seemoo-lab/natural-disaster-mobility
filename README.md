@@ -2,6 +2,8 @@
 
 This repository contains a *mobility model for natural disasters* as well as two specific disaster scenarios: *2013 Typhoon Haiyan* (for the city of [Tacloban](https://www.openstreetmap.org/#map=18/11.24303/125.00720&layers=H)) and *2010 Haiti earthquake* (for the surroundings of [Port au Prince](https://www.openstreetmap.org/#map=18/18.54733/-72.34053&layers=H)).
 
+*It also contains a number of non-upstream patches to the ONE, e.g., b15434a99da132f1376e80fd071a5f6f8316ed1a, 4f7fa115373a972883991a2aca285e2c82d784f0, 0707229877c471b7ef6c343b2cd2f7e9466fa8eb, b27d8313512d8fa98cee4f78794d730eb1aaf8eb.*
+
 ## Code Navigation
 
 This repository is a fork of the [Opportunistic Network Environment (ONE) simulator](http://akeranen.github.io/the-one/) and, thus, we place our code and data in the following locations:
