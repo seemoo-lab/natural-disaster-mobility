@@ -99,7 +99,7 @@ def exp_string_from_flat_settings(flat_settings):
 def create_exp_settings_file(work_dir, settings_base_file, flat_setting):
     settings_base_file_name = os.path.split(settings_base_file)[-1]
     exp_string = exp_string_from_flat_settings(flat_setting)
-    exp_dir = os.path.join(work_dir, "experiments", exp_string)
+    exp_dir = os.path.join(work_dir, names.report_dir(), exp_string)
     create_dir_if_not_exists(exp_dir, isfile=False)
     flat_setting["Report.reportDir"] = exp_dir
     exp_settings_file = os.path.join(work_dir, exp_dir, settings_base_file_name)
