@@ -18,5 +18,6 @@ def plot_buffer_occupancy(config, plot_prefix=None, titles=None):
             titles=[make_title(c) for c in expand_config(titles)],
             xscale=60 * 60 * 24,
             xticks=1,
-            xlabel='Time [h]',
+            yscale=100,  # BUFFER_REPORT is in percent
+            xlabel='Time [days]',
             ylabel='Buffer Occupancy')
