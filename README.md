@@ -24,7 +24,7 @@ To use the model, simply base your evaluation scenario on one of the scenario in
 
 For more information on the underlying model, please refer to our paper. If you use this model or code in your own work, we are happy to receive a citation.
 
-Milan Schmittner, Max Maass, Tom Schons, and Matthias Hollick, “**Reverse Engineering Human Mobility in Large-scale Natural Disasters**,” in *ACM International Conference on Modeling, Analysis and Simulation of Wireless and Mobile Systems (MSWiM)*, November 2017, Miami Beach, USA.
+Milan Stute, Max Maass, Tom Schons, and Matthias Hollick, “**Reverse Engineering Human Mobility in Large-scale Natural Disasters**,” to appear in *ACM International Conference on Modeling, Analysis and Simulation of Wireless and Mobile Systems (MSWiM)*, November 2017, Miami Beach, USA.
 
 ## Reproducibility
 
